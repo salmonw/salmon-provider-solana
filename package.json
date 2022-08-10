@@ -2,15 +2,15 @@
   "name": "salmon-provider-solana",
   "version": "0.0.1",
   "description": "Provider for solana",
-  "main": "dist/bundle.js",
+  "main": "lib/index.js",
   "engines": {
     "node": ">=14.17.0"
   },
   "scripts": {
     "linter": "eslint ./ --fix",
-    "publish:patch": "npm version patch && npm publish",
+    "publish:patch": "npm version patch && npm prepublish &&npm publish",
     "test": "jest",
-    "build": "npx webpack --config=webpack.config.js"
+    "prepublish": "npx tsc"
   },
   "repository": {
     "type": "git",
@@ -43,10 +43,7 @@
     "jest": "^28.1.3",
     "ts-loader": "^9.3.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.7.4",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "typescript": "^4.7.4"    
   },
   "dependencies": {
     "@bonfida/spl-name-service": "^0.1.47",
