@@ -2,7 +2,7 @@ import { restoreAccount, restoreDerivedAccounts } from '../src/services/solana-a
 import { MNEMONIC, PUBLIC_KEY, NETWORK_ID } from './config';
 
 test('solana-account-get-balance', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   console.log(account);
   const balance = await account.getBalance();  
   expect(balance.usdTotal).toBeGreaterThanOrEqual(0);
@@ -10,7 +10,7 @@ test('solana-account-get-balance', async () => {
 });
 
 test('solana-validate-destination-account', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, { networkId: NETWORK_ID });
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[5];
 
@@ -33,35 +33,36 @@ test('solana-validate-destination-account', async () => {
   expect(result4.type).toBe('WARNING');
 });
 
-test('solana-account-get-tokens', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
-  const tokens = await account.getTokens();
+test('solana-account-get-tokens', async () => {  
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);  
+  const tokens = await account.getTokens();  
   expect(tokens.length).toBeGreaterThan(0);
 });
 
 test('solana-account-get-receive-address', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID );
   const receiveAddress = await account.getReceiveAddress();
   expect(receiveAddress).toBeDefined();
   expect(receiveAddress).toBe(PUBLIC_KEY);
 });
 
 test('solana-get-networks', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  console.log(1);
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const networks = await account.getNetworks();
   expect(networks).toBeDefined();
   expect(networks.length).toBeGreaterThan(0);
 });
 
 test('solana-get-network', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const network = await account.getCurrentNetwork();
   expect(network).toBeDefined();
   expect(network.networkId).toBe(NETWORK_ID);
 });
 
 test('solana-set-network', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const networks = await account.getNetworks();
   const newNetwork = networks[1];
   account.setNetwork(newNetwork.networkId);
@@ -69,7 +70,7 @@ test('solana-set-network', async () => {
 });
 
 test('solana-get-transactions', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const transactions = await account.getRecentTransactions(null);  
   // const size = transactions.filter((t) => t.data).length;
   expect(transactions.length).toBe(8);

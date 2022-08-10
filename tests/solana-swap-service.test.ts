@@ -16,10 +16,7 @@ test.only('solana-swap-quote', async () => {
 });
 
 test.only('solana-create-swap', async () => {
-  const account = await restoreAccount(MNEMONIC, {
-    networkId: NETWORK_ID,
-    params: { accessToken: ACCESS_TOKEN },
-  });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const amount = 0.009;
   const slippage = 0.5;
   const quote = await account.getBestSwapQuote(SOL_ADDRESS, USDC_ADDRESS, amount, slippage);
@@ -29,10 +26,7 @@ test.only('solana-create-swap', async () => {
 });
 
 test.only('solana-execute-swap', async () => {
-  const account = await restoreAccount(MNEMONIC, {
-    nodeUrl: NODE_URL,
-    networkId: NETWORK_ID,
-  });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const amount = 0.01;
   const slippage = 0.5;
   const quote = await account.getBestSwapQuote(SOL_ADDRESS, USDC_ADDRESS, amount, slippage);

@@ -3,7 +3,7 @@ import { SOL_ADDRESS, SOLANA } from '../src/constants/solana-constants';
 import { MNEMONIC, TOKEN_ADDRESS, NETWORK_ID } from './config';
 
 test.only('solana-transfer-sol', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, { networkId: NETWORK_ID });
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;
@@ -17,7 +17,7 @@ test.only('solana-transfer-sol', async () => {
 });
 
 test('solana-transfer-token', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, { networkId: NETWORK_ID });
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;
@@ -32,7 +32,7 @@ test('solana-transfer-token', async () => {
 
 /*
 test('solana-account-airdrop', async() => {    
-  const account = await restoreAccount(SOLANA, MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(SOLANA, MNEMONIC, NETWORK_ID);
   const result = await account.airdrop(1);
   console.log(JSON.stringify(result, null, "\t"));
 });

@@ -11,7 +11,7 @@ import {
 } from '../src/services/solana-token-service';
 
 test('get-assoc-token-address', async () => {
-  const account = await restoreAccount(MNEMONIC, { networkId: NETWORK_ID });
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const ata = await getAssociatedTokenAddress(
     new PublicKey(TOKEN_ADDRESS),
     account.publicKey
@@ -21,7 +21,7 @@ test('get-assoc-token-address', async () => {
 });
 
 test('get-valid-token-account', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, { networkId: NETWORK_ID });
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account = accounts[0];
   const tokenAccount = await getTokenAccount(
     await account.getConnection(),
@@ -32,7 +32,7 @@ test('get-valid-token-account', async () => {
 });
 
 test('get-invalid-token-account', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, { networkId: NETWORK_ID });
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account = accounts[9];
   const tokenAccount = await getTokenAccount(
     await account.getConnection(),

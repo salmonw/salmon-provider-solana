@@ -35,8 +35,8 @@ export class SolanaAccount extends Account {
   }
 
   async getConnection():Promise<any> {
-    if (!this.connection) {
-      const { nodeUrl } = await configService.getConfig(this.networkId);
+    if (!this.connection) {      
+      const { nodeUrl } = await configService.getConfig(this.networkId);      
       this.connection = new Connection(nodeUrl);
     }
     return this.connection;
@@ -44,7 +44,7 @@ export class SolanaAccount extends Account {
 
   async getTokens() {
     const connection = await this.getConnection();
-    return tokenListService.getTokensByOwner(connection, this.publicKey);
+    return tokenListService.getTokensByOwner(connection, this.publicKey);    
   }
 
   async getBalance() {
