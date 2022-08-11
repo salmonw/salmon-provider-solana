@@ -7,7 +7,8 @@ const getTokenInfo = async (transaction, connection, isOut) => {
   const tokenAddress = isOut
     ? txMeta.innerInstructions[0]?.instructions[1]?.parsed?.info?.destination
     : txMeta.innerInstructions[1]?.instructions[2]?.parsed?.info?.destination;
-  const tokenAccount = tokenAddress && (await connection.getParsedAccountInfo(new PublicKey(tokenAddress)));
+  const tokenAccount = tokenAddress
+    && (await connection.getParsedAccountInfo(new PublicKey(tokenAddress)));
 
   if (tokenAccount) {
     return tokenListService.getTokenByAddress(tokenAccount.value.data.parsed.info.mint);

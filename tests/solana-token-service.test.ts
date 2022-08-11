@@ -3,7 +3,6 @@ import {
   restoreAccount,
   restoreDerivedAccounts,
 } from '../src/services/solana-account-service';
-import { SOLANA } from '../src/constants/solana-constants';
 import { MNEMONIC, TOKEN_ADDRESS, NETWORK_ID } from './config';
 import {
   getTokenAccount,

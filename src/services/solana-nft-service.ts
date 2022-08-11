@@ -10,13 +10,6 @@ const getAll = async (networkId, publicKey, noCache = false) => {
   return response.data;
 };
 
-const getAllGroupedByCollection = async (networkId, owner) => {
-  const nfts = await getAll(networkId, owner);
-  const nftsByCollection = getNftsByCollection(nfts);
-  const nftsWithoutCollection = getNftsWithoutCollection(nfts);
-  return [...nftsByCollection, ...nftsWithoutCollection];
-};
-
 const getCollections = (nfts) => {
   const collections = nfts.map((nft) => nft.collection?.name).filter((e) => e !== undefined);
   return Array.from(new Set(collections));
@@ -39,6 +32,13 @@ const getNftsByCollection = (nfts) => {
 };
 
 const getNftsWithoutCollection = (nfts) => nfts.filter((nft) => !nft.collection);
+
+const getAllGroupedByCollection = async (networkId, owner) => {
+  const nfts = await getAll(networkId, owner);
+  const nftsByCollection = getNftsByCollection(nfts);
+  const nftsWithoutCollection = getNftsWithoutCollection(nfts);
+  return [...nftsByCollection, ...nftsWithoutCollection];
+};
 
 export {
   getAll,

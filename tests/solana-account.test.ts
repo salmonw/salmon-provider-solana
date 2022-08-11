@@ -10,7 +10,7 @@ test('solana-account-get-balance', async () => {
 });
 
 test('solana-validate-destination-account', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = await restoreDerivedAccounts({ mnemonic: MNEMONIC, args: NETWORK_ID });
   const account1 = accounts[0];
   const account2 = accounts[5];
 

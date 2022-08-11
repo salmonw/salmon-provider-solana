@@ -31,10 +31,8 @@ const validateDestinationAccount = async (connection, address) => {
 
   const accountInfo = await connection.getAccountInfo(publicKey);
   if (accountInfo == null) return EMPTY_ACCOUNT;
-  if (accountInfo.lamports == 0) return NO_FUNDS;
+  if (accountInfo.lamports === 0) return NO_FUNDS;
   return VALID_ACCOUNT;
 };
 
-export {
-  validateDestinationAccount,
-};
+export default validateDestinationAccount;

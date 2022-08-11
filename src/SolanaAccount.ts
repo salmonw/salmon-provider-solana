@@ -62,7 +62,12 @@ export default class SolanaAccount extends Account {
 
   async getOrCreateTokenAccount(toPublicKey, token) {
     const connection = await this.getConnection();
-    return tokenService.getOrCreateTokenAccount(connection, super.retrieveSecureKeyPair(), token, toPublicKey);
+    return tokenService.getOrCreateTokenAccount(
+      connection,
+      super.retrieveSecureKeyPair(),
+      token,
+      toPublicKey,
+    );
   }
 
   async validateDestinationAccount(address) {
@@ -72,7 +77,7 @@ export default class SolanaAccount extends Account {
 
   async transfer(destination, token, amount) {
     const connection = await this.getConnection();
-    if (token == SOL_ADDRESS) {
+    if (token === SOL_ADDRESS) {
       return transferService.transferSol(
         connection,
         super.retrieveSecureKeyPair(),
@@ -108,7 +113,12 @@ export default class SolanaAccount extends Account {
 
   async createSwapTransaction(routeId) {
     const connection = await this.getConnection();
-    return swapService.createTransaction(this.networkId, connection, super.retrieveSecureKeyPair(), routeId);
+    return swapService.createTransaction(
+      this.networkId,
+      connection,
+      super.retrieveSecureKeyPair(),
+      routeId,
+    );
   }
 
   async executeSwapTransaction(txId) {
@@ -118,6 +128,9 @@ export default class SolanaAccount extends Account {
 
   async getRecentTransactions(lastSignature) {
     const connection = await this.getConnection();
+    if (!this.signatures) {
+      this.signatures = await connection.getSignaturesForAddress(this.publicKey);
+    }
     return recentTransactionsService.list(
       connection,
       this.signatures,
@@ -133,7 +146,7 @@ export default class SolanaAccount extends Account {
     }
   }
 
-  async getNetworks() {
+  static async getNetworks() {
     return configService.getNetworks();
   }
 
@@ -150,12 +163,12 @@ export default class SolanaAccount extends Account {
     return nameService.getDomainName(connection, this.publicKey);
   }
 
+  static async getPublicKeyFromDomain(domain) {
+    return nameService.getPublicKey(domain);
+  }
+
   async getDomainFromPublicKey(publicKey) {
     const connection = await this.getConnection();
     return nameService.getDomainName(connection, publicKey);
-  }
-
-  async getPublicKeyFromDomain(domain) {
-    return nameService.getPublicKey(domain);
   }
 }

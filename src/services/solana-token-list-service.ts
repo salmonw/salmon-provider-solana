@@ -36,12 +36,12 @@ async function getTokensByOwner(connection, publicKey) {
 
 async function getTokenBySymbol(symbol) {
   const tokens = await getTokenList();
-  return tokens.filter((t) => t.symbol == symbol);
+  return tokens.filter((t) => t.symbol === symbol);
 }
 
 async function getTokenByAddress(address) {
   const tokens = await getTokenList();
-  return tokens.filter((t) => t.address == address);
+  return tokens.filter((t) => t.address === address);
 }
 
 export {

@@ -1,6 +1,6 @@
 import { restoreAccount } from '../src/services/solana-account-service';
-import { MNEMONIC, NODE_URL, NETWORK_ID } from './config';
-import { USDC_ADDRESS, SOL_ADDRESS, SOLANA } from '../src/constants/solana-constants';
+import { MNEMONIC, NETWORK_ID } from './config';
+import { USDC_ADDRESS, SOL_ADDRESS } from '../src/constants/solana-constants';
 
 const ACCESS_TOKEN = 'AhIyTpCFdC4MuWbI4kLLptGvhJaueZq6Tskx7g6FUQ3zmN85u9xHrKkxRP19myn8';
 
@@ -12,7 +12,7 @@ test.only('solana-swap-quote', async () => {
   const amount = 100;
   const slippage = 0.5;
   const quote = await account.getBestSwapQuote(USDC_ADDRESS, SOL_ADDRESS, amount, slippage);
-  // console.log(quote);
+  console.log(quote);
 });
 
 test.only('solana-create-swap', async () => {

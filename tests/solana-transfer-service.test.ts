@@ -1,5 +1,5 @@
 import { restoreDerivedAccounts } from '../src/services/solana-account-service';
-import { SOL_ADDRESS, SOLANA } from '../src/constants/solana-constants';
+import { SOL_ADDRESS } from '../src/constants/solana-constants';
 import { MNEMONIC, TOKEN_ADDRESS, NETWORK_ID } from './config';
 
 test.only('solana-transfer-sol', async () => {
@@ -7,7 +7,6 @@ test.only('solana-transfer-sol', async () => {
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;
-  const opts = { simulate: false };
   const result1 = await account1.transfer(account2.publicKey.toBase58(), SOL_ADDRESS, amount);
   expect(result1).toBeDefined();
   // console.log(`Transaction id ${result1}`);

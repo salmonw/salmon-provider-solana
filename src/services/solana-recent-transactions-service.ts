@@ -1,17 +1,10 @@
 import { decorateRecentTransactions } from './solana-recent-tx-decorator';
 
 const list = async (connection, signatures, publicKey, lastSignature) => {
-  if (!signatures) {
-    signatures = await connection.getSignaturesForAddress(publicKey);
-  }
-
-  // lastSignature =
-  //   '2m7H2yDF8rGXem6pCpF2XYxSFKpgtwCRKMGmp3rFqY7GFZvHQeGf6mQ2pgxXDH8d8BiF1iSZk8RQna2W3hBcDVyH';
-
   let empty = [];
   if (lastSignature) {
     signatures.map((s, i) => {
-      if (s.signature == lastSignature) {
+      if (s.signature === lastSignature) {
         empty = signatures.filter((s) => !s.data).slice(i + 1, i + 9);
       }
     });

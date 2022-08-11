@@ -10,6 +10,22 @@ import {
 } from './solana-token-service';
 import { getTokenByAddress } from './solana-token-list-service';
 
+const sendAndConfirmTransaction = async (connection, transaction, keyPair) => {
+  const txid = await connection.sendTransaction(transaction, [keyPair], {
+    skipPreflight: true,
+  });
+  const response = await connection.confirmTransaction(txid);
+  return { txid, response };
+};
+
+const execute = async (connection, transaction, keyPair) => {
+  const simulation = await connection.simulateTransaction(transaction, [keyPair]);
+  if (simulation) {
+    return sendAndConfirmTransaction(connection, transaction, keyPair);
+  }
+  throw Error('simulation failed');
+};
+
 /**
  * Sends SOL between accounts
  * @param connection rpc connection
@@ -36,9 +52,7 @@ const transferSpl = async (
 
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
   if (!destTokenAccount) {
-    console.log('creating token account');
-    const ta = await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
-    console.log(`Token account: ${ta}`);
+    await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
   }
 
   const result = await transfer(
@@ -72,22 +86,6 @@ const transferSol = async (connection, fromKeyPair, toPublicKey, amount) => {
   );
   const result = await execute(connection, transaction, fromKeyPair);
   return result ? result.txid : undefined;
-};
-
-const sendAndConfirmTransaction = async (connection, transaction, keyPair) => {
-  const txid = await connection.sendTransaction(transaction, [keyPair], {
-    skipPreflight: true,
-  });
-  const response = await connection.confirmTransaction(txid);
-  return { txid, response };
-};
-
-const execute = async (connection, transaction, keyPair) => {
-  const simulation = await connection.simulateTransaction(transaction, [keyPair]);
-  if (simulation) {
-    return sendAndConfirmTransaction(connection, transaction, keyPair);
-  }
-  throw Error('simulation failed');
 };
 
 const airdrop = async (connection, publicKey, amount) => {
