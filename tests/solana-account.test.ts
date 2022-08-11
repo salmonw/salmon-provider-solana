@@ -4,7 +4,7 @@ import { MNEMONIC, PUBLIC_KEY, NETWORK_ID } from './config';
 test('solana-account-get-balance', async () => {
   const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   console.log(account);
-  const balance = await account.getBalance();  
+  const balance = await account.getBalance();
   expect(balance.usdTotal).toBeGreaterThanOrEqual(0);
   expect(balance.items.length).toBeGreaterThan(0);
 });
@@ -33,14 +33,14 @@ test('solana-validate-destination-account', async () => {
   expect(result4.type).toBe('WARNING');
 });
 
-test('solana-account-get-tokens', async () => {  
-  const account = await restoreAccount(MNEMONIC, NETWORK_ID);  
-  const tokens = await account.getTokens();  
+test('solana-account-get-tokens', async () => {
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
+  const tokens = await account.getTokens();
   expect(tokens.length).toBeGreaterThan(0);
 });
 
 test('solana-account-get-receive-address', async () => {
-  const account = await restoreAccount(MNEMONIC, NETWORK_ID );
+  const account = await restoreAccount(MNEMONIC, NETWORK_ID);
   const receiveAddress = await account.getReceiveAddress();
   expect(receiveAddress).toBeDefined();
   expect(receiveAddress).toBe(PUBLIC_KEY);
@@ -71,7 +71,7 @@ test('solana-set-network', async () => {
 
 test('solana-get-transactions', async () => {
   const account = await restoreAccount(MNEMONIC, NETWORK_ID);
-  const transactions = await account.getRecentTransactions(null);  
+  const transactions = await account.getRecentTransactions(null);
   // const size = transactions.filter((t) => t.data).length;
   expect(transactions.length).toBe(8);
 });

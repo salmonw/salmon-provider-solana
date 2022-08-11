@@ -27,7 +27,7 @@ const getNftsByCollection = (nfts) => {
   return collections
     .map((collection) => {
       const items = nfts.filter((nft) => nft.collection?.name === collection);
-      const length = items.length;
+      const { length } = items;
       return {
         collection,
         length,
@@ -38,9 +38,7 @@ const getNftsByCollection = (nfts) => {
     .sort((a, b) => b.length - a.length);
 };
 
-const getNftsWithoutCollection = (nfts) => {
-  return nfts.filter((nft) => !nft.collection);
-};
+const getNftsWithoutCollection = (nfts) => nfts.filter((nft) => !nft.collection);
 
 export {
   getAll,

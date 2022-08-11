@@ -22,7 +22,7 @@ const list = async (connection, signatures, publicKey, lastSignature) => {
   let transactions = [];
   const signArray = empty.map((item) => item.signature);
   await Promise.resolve(
-    (transactions = await connection.getParsedConfirmedTransactions(signArray, 'finalized'))
+    (transactions = await connection.getParsedConfirmedTransactions(signArray, 'finalized')),
   );
 
   empty.map((s, i) => {
@@ -32,12 +32,10 @@ const list = async (connection, signatures, publicKey, lastSignature) => {
   // console.log('signatures post', JSON.stringify(signatures[1], '', 4));
   // console.log('empty post', JSON.stringify(empty[1], '', 4));
 
-  return await Promise.all(
+  return Promise.all(
     signatures
       .filter((s) => s.data)
-      .map(async (transaction) => {
-        return await decorateRecentTransactions(transaction, connection, publicKey);
-      })
+      .map(async (transaction) => decorateRecentTransactions(transaction, connection, publicKey)),
   );
 };
 

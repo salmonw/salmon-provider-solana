@@ -18,16 +18,18 @@ async function getTokenList() {
   return tokens;
 }
 
-async function getTokensByOwner(connection, publicKey) {  
+async function getTokensByOwner(connection, publicKey) {
   const response = await connection.getParsedTokenAccountsByOwner(publicKey, {
     programId: TOKEN_PROGRAM_ID,
-  });  
+  });
   const result = response.value.map((item) => {
     const account = item.account.data.parsed.info;
-    const tokenAmount = account.tokenAmount;
+    const { tokenAmount } = account;
     const { mint, owner } = account;
     const { amount, decimals, uiAmount } = tokenAmount;
-    return { mint, owner, amount, decimals, uiAmount };
+    return {
+      mint, owner, amount, decimals, uiAmount,
+    };
   });
   return result;
 }

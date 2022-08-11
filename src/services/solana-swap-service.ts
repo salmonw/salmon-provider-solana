@@ -46,9 +46,7 @@ const createTransaction = async (networkId, connection, keypair, routeId) => {
   return txid;
 };
 
-const executeTransaction = async (connection, txId) => {
-  return await connection.confirmTransaction(txId);
-};
+const executeTransaction = async (connection, txId) => await connection.confirmTransaction(txId);
 
 export {
   quote,

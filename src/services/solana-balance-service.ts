@@ -1,13 +1,16 @@
-import { LAMPORTS_PER_SOL }from '@solana/web3.js';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { getTokensByOwner, getTokenList } from './solana-token-list-service';
+import {
+  SOL_DECIMALS, SOL_SYMBOL, SOL_NAME, SOL_LOGO,
+} from '../constants/solana-constants';
+
 const {
   decorateBalanceList,
   decorateBalancePrices,
   getLast24HoursChange,
   getPricesByPlatform,
   SOLANA_PLATFORM,
-} = require('salmon-provider-template');
-import { getTokensByOwner, getTokenList } from './solana-token-list-service';
-import { SOL_DECIMALS, SOL_SYMBOL, SOL_NAME, SOL_LOGO } from '../constants/solana-constants';
+} = require('salmon-provider-base');
 
 const getSolanaBalance = async (connection, publicKey) => {
   const balance = await connection.getBalance(publicKey);
@@ -17,7 +20,7 @@ const getSolanaBalance = async (connection, publicKey) => {
     owner: publicKey.toBase58(),
     amount: balance,
     decimals: SOL_DECIMALS,
-    uiAmount: uiAmount,
+    uiAmount,
     symbol: SOL_SYMBOL,
     name: SOL_NAME,
     logo: SOL_LOGO,
@@ -40,7 +43,7 @@ const getBalance = async (connection, publicKey) => {
   const sortedBalances = balances.sort((a, b) => a.usdBalance < b.usdBalance);
   const usdTotal = balances.reduce(
     (currentValue, next) => (next.usdBalance || 0) + currentValue,
-    0
+    0,
   );
   const last24HoursChage = getLast24HoursChange(balances, usdTotal);
   return {

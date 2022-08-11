@@ -1,5 +1,5 @@
-import { Account }  from 'salmon-provider-template';
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import { Account } from 'salmon-provider-base';
+import { Connection, PublicKey } from '@solana/web3.js';
 import { SOL_ADDRESS, SOLANA } from './constants/solana-constants';
 import * as nftService from './services/solana-nft-service';
 import * as balanceService from './services/solana-balance-service';
@@ -12,17 +12,21 @@ import * as validationService from './services/solana-validation-service';
 import * as configService from './services/solana-config-service';
 import * as recentTransactionsService from './services/solana-recent-transactions-service';
 
+export default class SolanaAccount extends Account {
+  signatures?: object[];
 
-export class SolanaAccount extends Account {
-  
-  signatures?: object[]
   publicKey: PublicKey;
+
   path : string;
+
   index : number;
+
   networkId : string;
+
   chain : string;
-  connection?: Connection
-  
+
+  connection?: Connection;
+
   constructor(mnemonic: string, keyPair: any, path: string, index: number, networkId: string) {
     super();
     super.setSeedPhrase(mnemonic);
@@ -35,8 +39,8 @@ export class SolanaAccount extends Account {
   }
 
   async getConnection():Promise<any> {
-    if (!this.connection) {      
-      const { nodeUrl } = await configService.getConfig(this.networkId);      
+    if (!this.connection) {
+      const { nodeUrl } = await configService.getConfig(this.networkId);
       this.connection = new Connection(nodeUrl);
     }
     return this.connection;
@@ -44,7 +48,7 @@ export class SolanaAccount extends Account {
 
   async getTokens() {
     const connection = await this.getConnection();
-    return tokenListService.getTokensByOwner(connection, this.publicKey);    
+    return tokenListService.getTokensByOwner(connection, this.publicKey);
   }
 
   async getBalance() {
@@ -69,21 +73,20 @@ export class SolanaAccount extends Account {
   async transfer(destination, token, amount) {
     const connection = await this.getConnection();
     if (token == SOL_ADDRESS) {
-      return await transferService.transferSol(
+      return transferService.transferSol(
         connection,
         super.retrieveSecureKeyPair(),
         new PublicKey(destination),
-        amount        
+        amount,
       );
-    } else {
-      return await transferService.transferSpl(
-        connection,
-        super.retrieveSecureKeyPair(),
-        new PublicKey(destination),
-        token,
-        amount        
-      );
-    }    
+    }
+    return transferService.transferSpl(
+      connection,
+      super.retrieveSecureKeyPair(),
+      new PublicKey(destination),
+      token,
+      amount,
+    );
   }
 
   async airdrop(amount) {
@@ -119,7 +122,7 @@ export class SolanaAccount extends Account {
       connection,
       this.signatures,
       this.publicKey,
-      lastSignature
+      lastSignature,
     );
   }
 

@@ -1,12 +1,14 @@
-import { LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey } from '@solana/web3.js';
+import {
+  LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey,
+} from '@solana/web3.js';
 import { transfer } from '@solana/spl-token';
 import {
   getAssociatedTokenAddress,
   getTokenAccount,
   getOrCreateTokenAccount,
+  applyDecimals,
 } from './solana-token-service';
 import { getTokenByAddress } from './solana-token-list-service';
-import { applyDecimals } from './solana-token-service';
 
 /**
  * Sends SOL between accounts
@@ -22,11 +24,11 @@ const transferSpl = async (
   fromKeyPair,
   toPublicKey,
   tokenAddress,
-  amount  
+  amount,
 ) => {
   const fromTokenAddress = await getAssociatedTokenAddress(
     new PublicKey(tokenAddress),
-    fromKeyPair.publicKey
+    fromKeyPair.publicKey,
   );
   const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
   const token:any = await getTokenByAddress(tokenAddress);
@@ -46,7 +48,7 @@ const transferSpl = async (
     toTokenAddress,
     fromKeyPair.publicKey,
     transferAmount,
-    [fromKeyPair]
+    [fromKeyPair],
   );
   return result;
 };
@@ -60,24 +62,16 @@ const transferSpl = async (
  * @param opts simulate: simulates the transaction
  * @returns transaction result
  */
-const transferSol = async (connection, fromKeyPair, toPublicKey, amount) => {  
+const transferSol = async (connection, fromKeyPair, toPublicKey, amount) => {
   const transaction = new Transaction().add(
     SystemProgram.transfer({
       fromPubkey: fromKeyPair.publicKey,
       toPubkey: toPublicKey,
       lamports: LAMPORTS_PER_SOL * amount,
-    })
+    }),
   );
   const result = await execute(connection, transaction, fromKeyPair);
-  return result ? result.txid : undefined; 
-};
-
-const execute = async (connection, transaction, keyPair) => {  
-  const simulation = await connection.simulateTransaction(transaction, [keyPair]);
-  if(simulation) {
-     return await sendAndConfirmTransaction(connection, transaction, keyPair);
-  }
-  return Promise.reject('simulation failed');
+  return result ? result.txid : undefined;
 };
 
 const sendAndConfirmTransaction = async (connection, transaction, keyPair) => {
@@ -88,9 +82,17 @@ const sendAndConfirmTransaction = async (connection, transaction, keyPair) => {
   return { txid, response };
 };
 
+const execute = async (connection, transaction, keyPair) => {
+  const simulation = await connection.simulateTransaction(transaction, [keyPair]);
+  if (simulation) {
+    return sendAndConfirmTransaction(connection, transaction, keyPair);
+  }
+  throw Error('simulation failed');
+};
+
 const airdrop = async (connection, publicKey, amount) => {
   const airdropSignature = await connection.requestAirdrop(publicKey, amount * LAMPORTS_PER_SOL);
-  return await connection.confirmTransaction(airdropSignature);
+  return connection.confirmTransaction(airdropSignature);
 };
 
 export {

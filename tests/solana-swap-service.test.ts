@@ -12,7 +12,7 @@ test.only('solana-swap-quote', async () => {
   const amount = 100;
   const slippage = 0.5;
   const quote = await account.getBestSwapQuote(USDC_ADDRESS, SOL_ADDRESS, amount, slippage);
-  //console.log(quote);
+  // console.log(quote);
 });
 
 test.only('solana-create-swap', async () => {

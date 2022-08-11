@@ -1,5 +1,6 @@
 import { restoreAccount } from '../src/services/solana-account-service';
 import { MNEMONIC } from './config';
+
 const NETWORK_ID = 'mainnet-beta';
 
 test('solana-get-bonfida-domain', async () => {
