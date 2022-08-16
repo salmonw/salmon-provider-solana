@@ -35,4 +35,4 @@ const validateDestinationAccount = async (connection, address) => {
   return VALID_ACCOUNT;
 };
 
-export default validateDestinationAccount;
+export { validateDestinationAccount };

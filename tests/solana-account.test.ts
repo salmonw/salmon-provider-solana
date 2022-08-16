@@ -1,5 +1,6 @@
 import { restoreAccount, restoreDerivedAccounts } from '../src/services/solana-account-service';
 import { MNEMONIC, PUBLIC_KEY, NETWORK_ID } from './config';
+import SolanaAccount from '../src/SolanaAccount'
 
 test('solana-account-get-balance', async () => {
   const account = await restoreAccount(MNEMONIC, NETWORK_ID);
@@ -10,7 +11,7 @@ test('solana-account-get-balance', async () => {
 });
 
 test('solana-validate-destination-account', async () => {
-  const accounts = await restoreDerivedAccounts({ mnemonic: MNEMONIC, args: NETWORK_ID });
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[5];
 
@@ -49,7 +50,7 @@ test('solana-account-get-receive-address', async () => {
 test('solana-get-networks', async () => {
   console.log(1);
   const account = await restoreAccount(MNEMONIC, NETWORK_ID);
-  const networks = await account.getNetworks();
+  const networks = await SolanaAccount.getNetworks();
   expect(networks).toBeDefined();
   expect(networks.length).toBeGreaterThan(0);
 });
@@ -63,7 +64,7 @@ test('solana-get-network', async () => {
 
 test('solana-set-network', async () => {
   const account = await restoreAccount(MNEMONIC, NETWORK_ID);
-  const networks = await account.getNetworks();
+  const networks = await SolanaAccount.getNetworks();
   const newNetwork = networks[1];
   account.setNetwork(newNetwork.networkId);
   expect(account.networkId).toBe(newNetwork.networkId);

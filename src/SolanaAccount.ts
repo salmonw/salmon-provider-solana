@@ -13,6 +13,7 @@ import * as configService from './services/solana-config-service';
 import * as recentTransactionsService from './services/solana-recent-transactions-service';
 
 export default class SolanaAccount extends Account {
+
   signatures?: object[];
 
   publicKey: PublicKey;
@@ -28,13 +29,7 @@ export default class SolanaAccount extends Account {
   connection?: Connection;
 
   constructor(mnemonic: string, keyPair: any, path: string, index: number, networkId: string) {
-    super();
-    super.setSeedPhrase(mnemonic);
-    super.setKeyPair(keyPair);
-    this.publicKey = keyPair.publicKey;
-    this.path = path;
-    this.index = index;
-    this.networkId = networkId;
+    super(mnemonic, keyPair, path, index, networkId);
     this.chain = SOLANA;
   }
 

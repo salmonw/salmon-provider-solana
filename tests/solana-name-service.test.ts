@@ -1,5 +1,6 @@
 import { restoreAccount } from '../src/services/solana-account-service';
 import { MNEMONIC } from './config';
+import SolanaAccount from '../src/SolanaAccount';
 
 const NETWORK_ID = 'mainnet-beta';
 
@@ -17,6 +18,6 @@ test('solana-get-bonfida-my-domain', async () => {
 
 test('solana-get-bonfida-key', async () => {
   const account = await restoreAccount(MNEMONIC, NETWORK_ID);
-  const pk = await account.getPublicKeyFromDomain('bonfida.sol');
+  const pk = await SolanaAccount.getPublicKeyFromDomain('bonfida.sol');
   expect(pk.toBase58()).toBe('Crf8hzfthWGbGbLTVCiqRqV5MVnbpHB1L9KQMd6gsinb');
 });

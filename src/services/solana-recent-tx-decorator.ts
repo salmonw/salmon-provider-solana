@@ -38,7 +38,7 @@ const decorateRecentTransactions = async (transaction, connection, publicKey) =>
     }
   });
 
-  const type = tokenInfoOut?.length || tokenInfoIn?.length || isSwap
+  const type = tokenInfoOut.length || tokenInfoIn.length || isSwap
     ? 'swap'
     : txMsg.instructions[0]?.parsed?.type
         || txMsg.instructions[1]?.parsed?.type
@@ -63,10 +63,10 @@ const decorateRecentTransactions = async (transaction, connection, publicKey) =>
     ...(destination?.length && { destination }),
     ...(swapAmountIn?.length && { swapAmountIn }),
     ...(swapAmountOut?.length && { swapAmountOut }),
-    ...(tokenInfoIn?.length && { tokenNameIn: tokenInfoIn[0].symbol }),
-    ...(tokenInfoOut?.length && { tokenNameOut: tokenInfoOut[0].symbol }),
-    ...(tokenInfoIn?.length && { tokenLogoIn: tokenInfoIn[0].logo }),
-    ...(tokenInfoOut?.length && { tokenLogoOut: tokenInfoOut[0].logo }),
+    ...(tokenInfoIn.length && { tokenNameIn: tokenInfoIn[0].symbol }),
+    ...(tokenInfoOut.length && { tokenNameOut: tokenInfoOut[0].symbol }),
+    ...(tokenInfoIn.length && { tokenLogoIn: tokenInfoIn[0].logo }),
+    ...(tokenInfoOut.length && { tokenLogoOut: tokenInfoOut[0].logo }),
     ...(error && { error }),
   };
 };

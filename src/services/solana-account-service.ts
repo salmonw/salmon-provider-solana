@@ -15,7 +15,7 @@ const createAccountFromMnemonic = async (mnemonic, networkId) => {
 
 const createDerivedAccountsFromMnemonic = async (mnemonic, networkId) => {
   const keysInfo: KeyInfo[] = generateDerivedKeyPairs(mnemonic, COIN_TYPE_SOL, DERIVED_COUNT);
-  const accounts: Array<SolanaAccount> = [];
+  const accounts: SolanaAccount[] = [];
   for (let i = 0; i <= keysInfo.length; i += 1) {
     const { path, index, keyPair } = keysInfo[i];
     const account = new SolanaAccount(mnemonic, keyPair, path, index, networkId);
@@ -24,10 +24,10 @@ const createDerivedAccountsFromMnemonic = async (mnemonic, networkId) => {
   return accounts;
 };
 
-const restoreAccount = async (mnemonic, args) => createAccountFromMnemonic(mnemonic, args);
+const restoreAccount = async (mnemonic, networkId) => createAccountFromMnemonic(mnemonic, networkId);
 
-const restoreDerivedAccounts = async (mnemonic, args) => {
-  createDerivedAccountsFromMnemonic(mnemonic, args);
+const restoreDerivedAccounts = async (mnemonic, networkId) => {
+  createDerivedAccountsFromMnemonic(mnemonic, networkId);
 };
 
 export {
