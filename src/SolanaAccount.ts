@@ -1,4 +1,4 @@
-import { Account } from 'salmon-provider-base';
+import { Account } from '@salmonw/provider-base';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { SOL_ADDRESS, SOLANA } from './constants/solana-constants';
 import * as nftService from './services/solana-nft-service';
@@ -14,7 +14,6 @@ import * as recentTransactionsService from './services/solana-recent-transaction
 import * as accountService from './services/solana-account-service';
 
 export default class SolanaAccount extends Account {
-
   signatures?: object[];
 
   publicKey: PublicKey;

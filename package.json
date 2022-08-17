@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/salmonw/salmon-provider-solana",
   "devDependencies": {
-    "@salmon/eslint-config": "file:../salmon-eslint-config",
+    "@salmonw/eslint-config": "^0.0.1",
     "@types/jest": "^28.1.6",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
@@ -52,7 +52,7 @@
     "ed25519-hd-key": "^1.2.0",
     "events": "^3.3.0",
     "qs": "^6.10.3",
-    "salmon-provider-base": "file:../salmon-provider-base",
+    "@salmonw/provider-base": "file:../salmon-provider-base",
     "stream": "^0.0.2",
     "@solana/web3.js": "^1.50.1"
   }

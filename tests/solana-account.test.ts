@@ -1,5 +1,5 @@
 import { MNEMONIC, PUBLIC_KEY, NETWORK_ID } from './config';
-import SolanaAccount from '../src/SolanaAccount'
+import SolanaAccount from '../src/SolanaAccount';
 
 test('solana-account-get-balance', async () => {
   const account = await SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
