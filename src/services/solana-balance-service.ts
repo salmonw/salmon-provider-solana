@@ -4,13 +4,13 @@ import {
   SOL_DECIMALS, SOL_SYMBOL, SOL_NAME, SOL_LOGO,
 } from '../constants/solana-constants';
 
-const {
+import {
   decorateBalanceList,
   decorateBalancePrices,
   getLast24HoursChange,
   getPricesByPlatform,
   SOLANA_PLATFORM,
-} = require('salmon-provider-base');
+} from '@salmonw/provider-base';
 
 const getSolanaBalance = async (connection, publicKey) => {
   const balance = await connection.getBalance(publicKey);
@@ -45,6 +45,7 @@ const getBalance = async (connection, publicKey) => {
     (currentValue, next) => (next.usdBalance || 0) + currentValue,
     0,
   );
+  console.log(balances);
   const last24HoursChage = getLast24HoursChange(balances, usdTotal);
   return {
     usdTotal,

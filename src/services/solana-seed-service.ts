@@ -2,7 +2,7 @@ import * as bip39 from 'bip39';
 import { Keypair } from '@solana/web3.js';
 import { derivePath } from 'ed25519-hd-key';
 import {
-  COIN_TYPE_SOL, generatePath, generateMnemonicAndSeed, mnemonicToSeed } from '@salmonw/provider-base';
+  COIN_TYPE_SOL, generatePath, generateMnemonicAndSeed, mnemonicToSeed } from '@salmonw/provider-base'
 
 interface KeyInfo {
   path: string,

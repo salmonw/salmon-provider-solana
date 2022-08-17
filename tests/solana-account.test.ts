@@ -46,8 +46,7 @@ test('solana-account-get-receive-address', async () => {
   expect(receiveAddress).toBe(PUBLIC_KEY);
 });
 
-test('solana-get-networks', async () => {
-  console.log(1);
+test('solana-get-networks', async () => {  
   const account = await SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
   const networks = await SolanaAccount.getNetworks();
   expect(networks).toBeDefined();
