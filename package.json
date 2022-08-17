@@ -46,14 +46,14 @@
   "dependencies": {
     "@bonfida/spl-name-service": "^0.1.47",
     "@solana/spl-token": "^0.2.0",
-    "@solana/spl-token-registry": "^0.2.4151",
-    "@solana/web3.js": "^1.50.1",
+    "@solana/spl-token-registry": "^0.2.4151",    
     "axios": "^0.27.2",
     "bip39": "^3.0.4",
     "ed25519-hd-key": "^1.2.0",
     "events": "^3.3.0",
     "qs": "^6.10.3",
     "salmon-provider-base": "file:../salmon-provider-base",
-    "stream": "^0.0.2"
+    "stream": "^0.0.2",
+    "@solana/web3.js": "^1.50.1"
   }
 }

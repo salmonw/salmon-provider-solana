@@ -1,20 +1,19 @@
 import {
   generateDerivedKeyPairs,
   generateFirstKeyPair,
-  COIN_TYPE_SOL,
   KeyInfo,
-} from 'salmon-provider-base';
+} from './solana-seed-service';
 import SolanaAccount from '../SolanaAccount';
 
 const DERIVED_COUNT = 10;
 
 const createAccountFromMnemonic = async (mnemonic, networkId) => {
-  const { path, index, keyPair } = generateFirstKeyPair(mnemonic, COIN_TYPE_SOL);
+  const { path, index, keyPair } = generateFirstKeyPair(mnemonic);
   return new SolanaAccount(mnemonic, keyPair, path, index, networkId);
 };
 
 const createDerivedAccountsFromMnemonic = async (mnemonic, networkId) => {
-  const keysInfo: KeyInfo[] = generateDerivedKeyPairs(mnemonic, COIN_TYPE_SOL, DERIVED_COUNT);
+  const keysInfo: KeyInfo[] = generateDerivedKeyPairs(mnemonic, DERIVED_COUNT);
   const accounts: SolanaAccount[] = [];
   for (let i = 0; i <= keysInfo.length; i += 1) {
     const { path, index, keyPair } = keysInfo[i];
@@ -25,10 +24,7 @@ const createDerivedAccountsFromMnemonic = async (mnemonic, networkId) => {
 };
 
 const restoreAccount = async (mnemonic, networkId) => createAccountFromMnemonic(mnemonic, networkId);
-
-const restoreDerivedAccounts = async (mnemonic, networkId) => {
-  createDerivedAccountsFromMnemonic(mnemonic, networkId);
-};
+const restoreDerivedAccounts = async (mnemonic, networkId) => createDerivedAccountsFromMnemonic(mnemonic, networkId);
 
 export {
   createAccountFromMnemonic,

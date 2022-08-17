@@ -11,6 +11,7 @@ import * as nameService from './services/solana-name-service';
 import * as validationService from './services/solana-validation-service';
 import * as configService from './services/solana-config-service';
 import * as recentTransactionsService from './services/solana-recent-transactions-service';
+import * as accountService from './services/solana-account-service';
 
 export default class SolanaAccount extends Account {
 
@@ -31,6 +32,14 @@ export default class SolanaAccount extends Account {
   constructor(mnemonic: string, keyPair: any, path: string, index: number, networkId: string) {
     super(mnemonic, keyPair, path, index, networkId);
     this.chain = SOLANA;
+  }
+
+  static async restoreAccount(mnemonic: string, networkId: string): Promise<SolanaAccount> {
+    return accountService.restoreAccount(mnemonic, networkId);
+  }
+  
+  static async restoreDerivedAccounts(mnemonic: string, networkId: string): Promise<SolanaAccount[]> {
+    return accountService.restoreDerivedAccounts(mnemonic, networkId);  
   }
 
   async getConnection():Promise<any> {
