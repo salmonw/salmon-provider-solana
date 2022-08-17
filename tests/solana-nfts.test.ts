@@ -25,7 +25,7 @@ test.only('solana-get-all-nfts-grouped', async () => {
 
 // Transfer test are skipped
 test('nft-create-token-account', async () => {
-  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID );
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const ta = await account1.getOrCreateTokenAccount(account2.publicKey, NFT_ADDRESS);
@@ -33,7 +33,7 @@ test('nft-create-token-account', async () => {
 });
 
 test('solana-transfer-nft', async () => {
-  const accounts = await restoreDerivedAccounts( MNEMONIC, NETWORK_ID );
+  const accounts = await restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;

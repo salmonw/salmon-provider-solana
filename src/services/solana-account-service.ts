@@ -3,7 +3,7 @@ import {
   generateFirstKeyPair,
   COIN_TYPE_SOL,
   KeyInfo,
-} from 'salmon-provider-base';
+} from '@salmonw/provider-base';
 import SolanaAccount from '../SolanaAccount';
 
 const DERIVED_COUNT = 10;
