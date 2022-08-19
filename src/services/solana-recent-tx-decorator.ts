@@ -35,8 +35,15 @@ const decorateRecentTransactions = async (transaction, connection, publicKey) =>
     txMeta.innerInstructions.length - 1
   ]?.instructions?.filter((ins) => ins.parsed)[0].parsed?.info;
 
-  const tokenInfoIn = await getTokenInfo(swapIn?.destination, connection);
-  const tokenInfoOut = await getTokenInfo(swapOut?.destination, connection);
+  const tokenInfoIn = await getTokenInfo(swapIn?.destination || swapIn?.mint, connection);
+  const tokenInfoOut = await getTokenInfo(swapOut?.destination || swapOut?.mint, connection);
+
+  const transferInfoIn = await tokenListService.getTokenByAddress(swapIn?.mint);
+  const transferInfoOut = await tokenListService.getTokenByAddress(swapOut?.mint);
+
+  const transferAmount = txMeta.postTokenBalances?.filter(
+    (bal) => bal.owner === publicKey.toBase58()
+  )[0]?.uiTokenAmount?.uiAmount;
 
   const source =
     txMsg.instructions[0]?.parsed?.info?.source || txMsg.instructions[1]?.parsed?.info?.source;
@@ -84,6 +91,11 @@ const decorateRecentTransactions = async (transaction, connection, publicKey) =>
     ...(nftInfo?.collection && { nftAmount: nftInfo }),
     ...(source?.length && { source: source }),
     ...(destination?.length && { destination: destination }),
+    ...(transferInfoIn?.length && { transferNameIn: transferInfoIn[0].symbol }),
+    ...(transferInfoOut?.length && { transferNameOut: transferInfoOut[0].symbol }),
+    ...(transferInfoIn?.length && { transferLogoIn: transferInfoIn[0].logo }),
+    ...(transferInfoOut?.length && { transferLogoOut: transferInfoOut[0].logo }),
+    ...(transferAmount && { transferAmount: transferAmount }),
     ...(swapIn && { swapAmountIn: swapIn.amount }),
     ...(swapOut && { swapAmountOut: swapOut.amount }),
     ...(tokenInfoIn?.length && { tokenNameIn: tokenInfoIn[0].symbol }),
