@@ -41,13 +41,17 @@ const decorateRecentTransactions = async (transaction, connection, publicKey) =>
   const transferInfoIn = await tokenListService.getTokenByAddress(swapIn?.mint);
   const transferInfoOut = await tokenListService.getTokenByAddress(swapOut?.mint);
 
-  const transferAmount = txMeta.postTokenBalances?.filter(
-    (bal) => bal.owner === publicKey.toBase58()
-  )[0]?.uiTokenAmount?.uiAmount;
+  const transferAmount =
+    txMeta.postTokenBalances?.filter((bal) => bal.owner === publicKey.toBase58())[0]?.uiTokenAmount
+      ?.uiAmount ||
+    txMeta.preTokenBalances?.filter((bal) => bal.owner === publicKey.toBase58())[0]?.uiTokenAmount
+      ?.uiAmount;
 
   const source =
     txMsg.instructions[0]?.parsed?.info?.source || txMsg.instructions[1]?.parsed?.info?.source;
   const destination =
+    txMsg.instructions?.filter((ins) => ins?.parsed?.type === 'transfer')[0]?.parsed?.info
+      ?.destination ||
     txMsg.instructions[0]?.parsed?.info?.destination ||
     txMsg.instructions[1]?.parsed?.info?.destination ||
     txMsg.instructions[2]?.parsed?.info?.destination;
@@ -70,7 +74,10 @@ const decorateRecentTransactions = async (transaction, connection, publicKey) =>
         txMeta.innerInstructions[0]?.instructions[0]?.parsed?.type ||
         'transfer';
   const transferType =
-    (type === ('transfer' || 'createAccount' || 'createAccount') &&
+  ((type === 'transfer' ||
+    type === 'createAccount' ||
+    type === 'createAccount' ||
+    type === 'create') &&
       publicKey.toBase58() === source) ||
     !source
       ? 'sent'
