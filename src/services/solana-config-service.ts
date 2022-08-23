@@ -1,21 +1,23 @@
 import axios from 'axios';
+import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SALMON_API_URL } from '../constants/solana-constants';
 
-const getNetworks = async () => {
-  const { data } = await axios.get(`${SALMON_API_URL}/v1/solana/networks`);
-  return data;
-};
+const getNetworks = async () :Promise<INetwork[]> => axios.get(`${SALMON_API_URL}/v1/solana/networks`);
 
-const getConfig = async (networkId) => {
+const getConfig = async (networkId):Promise<INetworkConfigItem> => {
   try {
-    const { data } = await axios.get(`${SALMON_API_URL}/v1/solana/config`, {
+    const { data }: { data: INetworkConfigItem } = await axios.get<INetworkConfigItem>(`${SALMON_API_URL}/v1/solana/config`, {
       headers: { 'X-Network-Id': networkId },
     });
     return data;
-  } catch (e) {
+  } catch (e: unknown) {
     // JEST has problems with axios exceptions
     // returning circular objetcs when tries to stringify error.
-    throw (e.message);
+    if (e instanceof Error) {
+      throw (Error(`Error getting config ${e.message}`));
+    } else {
+      throw (Error('Unknown error getting config'));
+    }
   }
 };
 

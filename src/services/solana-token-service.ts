@@ -1,10 +1,14 @@
-import { PublicKey } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import {
   getOrCreateAssociatedTokenAccount,
   getAssociatedTokenAddress,
 } from '@solana/spl-token';
 
-const getTokenAccount = async (connection, destination, tokenAddress) => {
+const getTokenAccount = async (
+  connection: Connection,
+  destination: PublicKey,
+  tokenAddress: string,
+) => {
   const assocTokenAddress = await getAssociatedTokenAddress(
     new PublicKey(tokenAddress),
     destination,
@@ -13,10 +17,10 @@ const getTokenAccount = async (connection, destination, tokenAddress) => {
 };
 
 const getOrCreateTokenAccount = async (
-  connection,
-  fromKeyPair,
-  token,
-  toPublicKey,
+  connection: Connection,
+  fromKeyPair: Keypair,
+  token: string,
+  toPublicKey: PublicKey,
 ) => getOrCreateAssociatedTokenAccount(
   connection,
   fromKeyPair,
@@ -24,9 +28,15 @@ const getOrCreateTokenAccount = async (
   toPublicKey,
 );
 
-const applyDecimals = (amount, decimals) => Math.round(parseFloat(amount) * 10 ** decimals);
+const applyDecimals = (amount: number, decimals: number) => {
+  const result = Math.round(parseFloat(amount.toString()) * 10 ** decimals);
+  return result;
+};
 
-const applyOutDecimals = (amount, decimals) => parseFloat(amount) / 10 ** decimals;
+const applyOutDecimals = (amount:number, decimals:number) => {
+  const result = parseFloat(amount.toString()) / 10 ** decimals;
+  return result;
+};
 
 export {
   getTokenAccount,

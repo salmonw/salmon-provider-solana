@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey } from '@solana/web3.js';
 
 const INVALID_ADDRESS = {
   type: 'ERROR',
@@ -18,8 +18,8 @@ const VALID_ACCOUNT = {
   code: 'VALID_ACCOUNT',
 };
 
-const validateDestinationAccount = async (connection, address) => {
-  let publicKey = null;
+const validateDestinationAccount = async (connection: Connection, address: string) => {
+  let publicKey: PublicKey = null;
   try {
     publicKey = new PublicKey(address);
   } catch {

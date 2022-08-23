@@ -1,7 +1,8 @@
 import {
-  LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey,
+  LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey, Connection, Keypair,
 } from '@solana/web3.js';
 import { transfer } from '@solana/spl-token';
+import { IToken } from '@salmonw/provider-base';
 import {
   getAssociatedTokenAddress,
   getTokenAccount,
@@ -10,7 +11,11 @@ import {
 } from './solana-token-service';
 import { getTokenByAddress } from './solana-token-list-service';
 
-const sendAndConfirmTransaction = async (connection, transaction, keyPair) => {
+const sendAndConfirmTransaction = async (
+  connection: Connection,
+  transaction: Transaction,
+  keyPair: Keypair,
+) => {
   const txid = await connection.sendTransaction(transaction, [keyPair], {
     skipPreflight: true,
   });
@@ -18,7 +23,7 @@ const sendAndConfirmTransaction = async (connection, transaction, keyPair) => {
   return { txid, response };
 };
 
-const execute = async (connection, transaction, keyPair) => {
+const execute = async (connection: Connection, transaction: Transaction, keyPair: Keypair) => {
   const simulation = await connection.simulateTransaction(transaction, [keyPair]);
   if (simulation) {
     return sendAndConfirmTransaction(connection, transaction, keyPair);
@@ -36,18 +41,21 @@ const execute = async (connection, transaction, keyPair) => {
  * @returns transaction result
  */
 const transferSpl = async (
-  connection,
-  fromKeyPair,
-  toPublicKey,
-  tokenAddress,
-  amount,
+  connection: Connection,
+  fromKeyPair: Keypair,
+  toPublicKey: PublicKey,
+  tokenAddress: string,
+  amount: number,
 ) => {
   const fromTokenAddress = await getAssociatedTokenAddress(
     new PublicKey(tokenAddress),
     fromKeyPair.publicKey,
   );
-  const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
-  const token:any = await getTokenByAddress(tokenAddress);
+  const toTokenAddress: PublicKey = await getAssociatedTokenAddress(
+    new PublicKey(tokenAddress),
+    toPublicKey,
+  );
+  const token:IToken = await getTokenByAddress(tokenAddress);
   const transferAmount = token.decimals ? applyDecimals(amount, token.decimals) : amount;
 
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
@@ -76,7 +84,12 @@ const transferSpl = async (
  * @param opts simulate: simulates the transaction
  * @returns transaction result
  */
-const transferSol = async (connection, fromKeyPair, toPublicKey, amount) => {
+const transferSol = async (
+  connection: Connection,
+  fromKeyPair: Keypair,
+  toPublicKey: PublicKey,
+  amount: number,
+) => {
   const transaction = new Transaction().add(
     SystemProgram.transfer({
       fromPubkey: fromKeyPair.publicKey,
@@ -88,7 +101,7 @@ const transferSol = async (connection, fromKeyPair, toPublicKey, amount) => {
   return result ? result.txid : undefined;
 };
 
-const airdrop = async (connection, publicKey, amount) => {
+const airdrop = async (connection: Connection, publicKey: PublicKey, amount: number) => {
   const airdropSignature = await connection.requestAirdrop(publicKey, amount * LAMPORTS_PER_SOL);
   return connection.confirmTransaction(airdropSignature);
 };

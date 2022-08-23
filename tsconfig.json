@@ -17,5 +17,5 @@
         "dom"
       ]     
     },
-    "exclude" : ["tests/**"]
+    "exclude" : ["tests/**","lib/**"]
   }

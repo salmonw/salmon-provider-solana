@@ -1,16 +1,16 @@
 import { performReverseLookup, getDomainKey } from '@bonfida/spl-name-service';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, Connection } from '@solana/web3.js';
 
-const getDomainName = async (connection, publicKey) => {
+const getDomainName = async (connection: Connection, publicKey: PublicKey) => {
   try {
-    const result = await performReverseLookup(connection, new PublicKey(publicKey));
+    const result = await performReverseLookup(connection, publicKey);
     return `${result}.sol`;
   } catch (e) {
     return null;
   }
 };
 
-const getPublicKey = async (domainName) => {
+const getPublicKey = async (domainName: string) => {
   const result = await getDomainKey(domainName);
   return result.pubkey;
 };
