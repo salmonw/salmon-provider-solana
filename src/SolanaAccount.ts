@@ -78,25 +78,6 @@ export default class SolanaAccount extends Account {
     return validationService.validateDestinationAccount(connection, address);
   }
 
-  async transfer(destination, token, amount) {
-    const connection = await this.getConnection();
-    if (token === SOL_ADDRESS) {
-      return transferService.transferSol(
-        connection,
-        super.retrieveSecureKeyPair(),
-        new PublicKey(destination),
-        amount,
-      );
-    }
-    return transferService.transferSpl(
-      connection,
-      super.retrieveSecureKeyPair(),
-      new PublicKey(destination),
-      token,
-      amount,
-    );
-  }
-
   async airdrop(amount) {
     const connection = await this.getConnection();
     return transferService.airdrop(connection, this.publicKey, amount);
@@ -112,6 +93,34 @@ export default class SolanaAccount extends Account {
 
   async getBestSwapQuote(inToken, outToken, amount, slippage = 0.5) {
     return swapService.quote(this.networkId, inToken, outToken, amount, slippage);
+  }
+
+  async estimateTransferFee(destination, token, amount) {
+    const connection = await this.getConnection();
+    return transferService.estimateFee(
+      connection,
+      this.keyPair,
+      new PublicKey(destination),
+      token,
+      amount
+    );
+  }
+
+  async createTransferTransaction(destination, token, amount, opts = {}) {
+    const connection = await this.getConnection();
+    return transferService.createTransaction(
+      connection,
+      this.keyPair,
+      new PublicKey(destination),
+      token,
+      amount,
+      opts
+    );
+  }
+
+  async confirmTransferTransaction(txId) {
+    const connection = await this.getConnection();
+    return transferService.confirmTransaction(connection, txId);
   }
 
   async createSwapTransaction(routeId) {
