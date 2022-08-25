@@ -1,7 +1,7 @@
 import { Account } from '@salmonw/provider-base';
 import { Connection, PublicKey, Keypair } from '@solana/web3.js';
 import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
-import { SOL_ADDRESS, SOLANA } from './constants/solana-constants';
+import { SOLANA } from './constants/solana-constants';
 import * as nftService from './services/solana-nft-service';
 import * as balanceService from './services/solana-balance-service';
 import * as tokenListService from './services/solana-token-list-service';
@@ -117,22 +117,22 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return swapService.quote(this.networkId, inToken, outToken, amount, slippage);
   }
 
-  async estimateTransferFee(destination, token, amount) {
+  async estimateTransferFee(destination: string, token: string, amount: number) {
     const connection = await this.getConnection();
     return transferService.estimateFee(
       connection,
-      this.keyPair,
+      super.retrieveSecureKeyPair(),
       new PublicKey(destination),
       token,
       amount,
     );
   }
 
-  async createTransferTransaction(destination, token, amount, opts = {}) {
+  async createTransferTransaction(destination: string, token: string, amount: number, opts = {}) {
     const connection = await this.getConnection();
     return transferService.createTransaction(
       connection,
-      this.keyPair,
+      super.retrieveSecureKeyPair(),
       new PublicKey(destination),
       token,
       amount,
@@ -140,7 +140,7 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     );
   }
 
-  async confirmTransferTransaction(txId) {
+  async confirmTransferTransaction(txId: string) {
     const connection = await this.getConnection();
     return transferService.confirmTransaction(connection, txId);
   }

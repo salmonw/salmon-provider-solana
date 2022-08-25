@@ -3,7 +3,7 @@ import { MNEMONIC, TOKEN_ADDRESS, NETWORK_ID } from './config';
 import { SolanaAccount } from '../src/SolanaAccount';
 
 test.only('solana-estimate-fee-transfer-sol', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 0.2;
@@ -16,7 +16,7 @@ test.only('solana-estimate-fee-transfer-sol', async () => {
 });
 
 test.only('solana-estimate-fee-transfer-token', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 10;
@@ -41,7 +41,7 @@ test.only('solana-transfer-sol', async () => {
     opts,
   );
   expect(result1).toBeDefined();
-  console.log(`Transaction sign ${result1}`);
+  console.log(`Transaction sign ${JSON.stringify(result1)}`);
   const result2 = await account2.createTransferTransaction(
     account1.publicKey.toBase58(),
     SOL_ADDRESS,
@@ -49,11 +49,11 @@ test.only('solana-transfer-sol', async () => {
     opts,
   );
   expect(result2).toBeDefined();
-  console.log(`Transaction sign ${result2}`);
+  console.log(`Transaction sign ${JSON.stringify(result2)}`);
 });
 
 test.only('solana-transfer-token', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 11;
@@ -65,7 +65,7 @@ test.only('solana-transfer-token', async () => {
     opts,
   );
   expect(result1).toBeDefined();
-  console.log(`Transaction sign ${result1}`);
+  console.log(`Transaction sign ${JSON.stringify(result1)}`);
   const result2 = await account2.createTransferTransaction(
     account1.publicKey.toBase58(),
     TOKEN_ADDRESS,
@@ -73,14 +73,14 @@ test.only('solana-transfer-token', async () => {
     opts,
   );
   expect(result2).toBeDefined();
-  console.log(`Transaction sign ${result2}`);
+  console.log(`Transaction sign ${JSON.stringify(result2)}`);
 });
 
 test.only('solana-confirm-transfer', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const result = await account1.confirmTransferTransaction(
-    '2P9GS1gorxeUPRcga8toTfHERKs3VYjfXrwFNVyZGcWDam1e5wUPJ8mHj87ZypqkbhrGsNyFoiTj1sKM6tjYzXeV',
+    '5SHyr3EmxtExtk1BiN4UYq73Z2fboUtRo3gLLkS2Tb8wGSHUdQ2Yn5TUDnzmmkRdjHFvX3XM6fJoWpuYfLwy3Tcc',
   );
   expect(result).toBeDefined();
   console.log(`Transaction id ${JSON.stringify(result)}`);

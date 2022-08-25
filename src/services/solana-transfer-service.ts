@@ -12,27 +12,12 @@ import {
 import { getTokenByAddress } from './solana-token-list-service';
 import { SOL_ADDRESS } from '../constants/solana-constants';
 
-const createTransaction = async (
-  connection,
-  fromKeyPair,
-  toPublicKey,
-  token,
-  amount,
-  opts = {},
+const transactionSol = async (
+  connection: Connection,
+  fromKeyPair: Keypair,
+  toPublicKey: PublicKey,
+  amount: number,
 ) => {
-  const { simulate } = opts;
-  let transaction = null;
-  if (token == SOL_ADDRESS) {
-    transaction = await transactionSol(connection, fromKeyPair, toPublicKey, amount);
-  } else {
-    transaction = await transactionSpl(connection, fromKeyPair, toPublicKey, token, amount, opts);
-  }
-  const result = await execute(connection, transaction, fromKeyPair, simulate);
-  return result;
-};
-
-const transactionSol = async (connection, fromKeyPair, toPublicKey, amount, opts = {}) => {
-  const { simulate } = opts;
   const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
   const transaction = new Transaction({ feePayer: fromKeyPair.publicKey, recentBlockhash }).add(
     SystemProgram.transfer({
@@ -45,26 +30,25 @@ const transactionSol = async (connection, fromKeyPair, toPublicKey, amount, opts
 };
 
 const transactionSpl = async (
-  connection,
-  fromKeyPair,
-  toPublicKey,
-  tokenAddress,
-  amount,
-  opts = {},
+  connection: Connection,
+  fromKeyPair: Keypair,
+  toPublicKey: PublicKey,
+  tokenAddress: string,
+  amount: number,
 ) => {
-  const { simulate } = opts;
   const fromTokenAddress = await getAssociatedTokenAddress(
     new PublicKey(tokenAddress),
     fromKeyPair.publicKey,
   );
   const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
   const token = await getTokenByAddress(tokenAddress);
-  const transferAmount = token.decimals ? applyDecimals(amount, token.decimals) : amount;
+  const tokenDecimals: number = token.decimals;
+  const transferAmount = token.decimals ? applyDecimals(amount, tokenDecimals) : amount;
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
   if (!destTokenAccount) {
     console.log('creating token account');
     const ta = await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
-    console.log(`Token account: ${ta}`);
+    console.log(`Token account: ${JSON.stringify(ta)}`);
   }
   const transaction = new Transaction().add(
     createTransferInstruction(
@@ -82,35 +66,69 @@ const transactionSpl = async (
   return transaction;
 };
 
-const execute = async (connection, transaction, keyPair, simulate) => {
-  let result = null;
-  if (simulate) {
-    result = await connection.simulateTransaction(transaction, [keyPair]);
-  } else {
-    result = await sendTransaction(connection, transaction, keyPair);
-  }
-  return result;
-};
-
-const sendTransaction = async (connection, transaction, keyPair) => {
+const sendTransaction = async (
+  connection: Connection,
+  transaction: Transaction,
+  keyPair: Keypair,
+) => {
   const txid = await connection.sendTransaction(transaction, [keyPair], {
     skipPreflight: true,
   });
   return txid;
 };
 
-const estimateFee = async (connection, fromKeyPair, toPublicKey, token, amount) => {
-  let transaction;
-  if (token == SOL_ADDRESS) {
+const execute = async (
+  connection: Connection,
+  transaction: Transaction,
+  keyPair: Keypair,
+  simulate: boolean,
+) => {
+  return simulate
+    ? connection.simulateTransaction(transaction, [keyPair])
+    : sendTransaction(connection, transaction, keyPair);
+};
+
+interface OptInfo {
+  simulate: boolean
+}
+
+const createTransaction = async (
+  connection: Connection,
+  fromKeyPair: Keypair,
+  toPublicKey: PublicKey,
+  token: string,
+  amount: number,
+  opts: OptInfo,
+) => {
+  const { simulate } = opts;
+  let transaction: Transaction;
+  if (token === SOL_ADDRESS) {
     transaction = await transactionSol(connection, fromKeyPair, toPublicKey, amount);
   } else {
     transaction = await transactionSpl(connection, fromKeyPair, toPublicKey, token, amount);
   }
-  return await transaction.getEstimatedFee(connection);
+  const result = await execute(connection, transaction, fromKeyPair, simulate);
+  return result;
 };
 
-const confirmTransaction = async (connection, txId) => {
-  return await connection.confirmTransaction(txId);
+const estimateFee = async (
+  connection: Connection,
+  fromKeyPair: Keypair,
+  toPublicKey: PublicKey,
+  token: string,
+  amount: number,
+) => {
+  let transaction: Transaction;
+  if (token === SOL_ADDRESS) {
+    transaction = await transactionSol(connection, fromKeyPair, toPublicKey, amount);
+  } else {
+    transaction = await transactionSpl(connection, fromKeyPair, toPublicKey, token, amount);
+  }
+  return transaction.getEstimatedFee(connection);
+};
+
+const confirmTransaction = async (connection: Connection, txId: string) => {
+  return connection.confirmTransaction(txId);
 };
 
 const airdrop = async (connection: Connection, publicKey: PublicKey, amount: number) => {
@@ -118,7 +136,7 @@ const airdrop = async (connection: Connection, publicKey: PublicKey, amount: num
   return connection.confirmTransaction(airdropSignature);
 };
 
-module.exports = {
+export {
   estimateFee,
   createTransaction,
   confirmTransaction,
