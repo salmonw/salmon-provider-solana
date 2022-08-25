@@ -1,9 +1,9 @@
 import { SOL_ADDRESS } from '../src/constants/solana-constants';
 import { MNEMONIC, TOKEN_ADDRESS, NETWORK_ID } from './config';
-import SolanaAccount from '../src/SolanaAccount';
+import { SolanaAccount } from '../src/SolanaAccount';
 
 test.only('solana-transfer-sol', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;
@@ -16,7 +16,7 @@ test.only('solana-transfer-sol', async () => {
 });
 
 test('solana-transfer-token', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;

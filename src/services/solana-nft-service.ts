@@ -42,7 +42,20 @@ const getAllGroupedByCollection = async (networkId, owner) => {
   return [...nftsByCollection, ...nftsWithoutCollection];
 };
 
+const getNftByAddress = async (mintAddress: string) :Promise<INft> => {
+  try {
+    const { data } : { data: INft } = await axios.get(`${SALMON_API_URL}/v1/solana/nft/${mintAddress}`);
+    if (data.collection) {
+      return data;
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
 export {
   getAll,
   getAllGroupedByCollection,
+  getNftByAddress,
 };

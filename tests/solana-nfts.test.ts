@@ -1,12 +1,11 @@
-
 import { MNEMONIC } from './config';
-import SolanaAccount from '../src/SolanaAccount';
+import { SolanaAccount } from '../src/SolanaAccount';
 
 const NETWORK_ID = 'mainnet-beta';
 const NFT_ADDRESS = 'HBcZBEESoDJkwNkvciNMzyuZ2UrE5Q6RSH6mpqTAsHvV';
 
 test.only('solana-get-all-nfts', async () => {
-  const account = await SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
+  const account = SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
   const nfts = await account.getAllNfts();
   console.log('all:', nfts);
   expect(nfts).toBeDefined();
@@ -14,7 +13,7 @@ test.only('solana-get-all-nfts', async () => {
 });
 
 test.only('solana-get-all-nfts-grouped', async () => {
-  const account = await SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
+  const account = SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
   const nfts = await account.getAllNftsGrouped();
   console.log('grouped:', nfts);
   expect(nfts).toBeDefined();
@@ -23,7 +22,7 @@ test.only('solana-get-all-nfts-grouped', async () => {
 
 // Transfer test are skipped
 test('nft-create-token-account', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID );
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const ta = await account1.getOrCreateTokenAccount(account2.publicKey, NFT_ADDRESS);
@@ -31,7 +30,7 @@ test('nft-create-token-account', async () => {
 });
 
 test('solana-transfer-nft', async () => {
-  const accounts = await SolanaAccount.restoreDerivedAccounts( MNEMONIC, NETWORK_ID );
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 1;

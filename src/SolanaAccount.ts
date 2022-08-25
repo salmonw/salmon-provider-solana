@@ -1,6 +1,6 @@
 import { Account } from '@salmonw/provider-base';
 import { Connection, PublicKey, Keypair } from '@solana/web3.js';
-import { INetwork } from '@salmonw/provider-base/src/types/config';
+import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SOL_ADDRESS, SOLANA } from './constants/solana-constants';
 import * as nftService from './services/solana-nft-service';
 import * as balanceService from './services/solana-balance-service';
@@ -175,7 +175,7 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return configService.getNetworks();
   }
 
-  async getCurrentNetwork() {
+  async getCurrentNetwork(): Promise<INetworkConfigItem> {
     return configService.getConfig(this.networkId);
   }
 
@@ -188,7 +188,7 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return nameService.getDomainName(connection, this.publicKey);
   }
 
-  static async getPublicKeyFromDomain(domain: string) {
+  static async getPublicKeyFromDomain(domain: string) :Promise<PublicKey> {
     return nameService.getPublicKey(domain);
   }
 
