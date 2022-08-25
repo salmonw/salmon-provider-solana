@@ -1,8 +1,8 @@
 import {
   LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey, Connection, Keypair,
 } from '@solana/web3.js';
-import { transfer } from '@solana/spl-token';
-import { IToken } from '@salmonw/provider-base';
+import { TOKEN_PROGRAM_ID, createTransferInstruction } from '@solana/spl-token';
+
 import {
   getAssociatedTokenAddress,
   getTokenAccount,
@@ -10,95 +10,107 @@ import {
   applyDecimals,
 } from './solana-token-service';
 import { getTokenByAddress } from './solana-token-list-service';
+import { SOL_ADDRESS } from '../constants/solana-constants';
 
-const sendAndConfirmTransaction = async (
-  connection: Connection,
-  transaction: Transaction,
-  keyPair: Keypair,
+const createTransaction = async (
+  connection,
+  fromKeyPair,
+  toPublicKey,
+  token,
+  amount,
+  opts = {},
 ) => {
-  const txid = await connection.sendTransaction(transaction, [keyPair], {
-    skipPreflight: true,
-  });
-  const response = await connection.confirmTransaction(txid);
-  return { txid, response };
-};
-
-const execute = async (connection: Connection, transaction: Transaction, keyPair: Keypair) => {
-  const simulation = await connection.simulateTransaction(transaction, [keyPair]);
-  if (simulation) {
-    return sendAndConfirmTransaction(connection, transaction, keyPair);
+  const { simulate } = opts;
+  let transaction = null;
+  if (token == SOL_ADDRESS) {
+    transaction = await transactionSol(connection, fromKeyPair, toPublicKey, amount);
+  } else {
+    transaction = await transactionSpl(connection, fromKeyPair, toPublicKey, token, amount, opts);
   }
-  throw Error('simulation failed');
-};
-
-/**
- * Sends SOL between accounts
- * @param connection rpc connection
- * @param fromKeyPair sender account key pair
- * @param toPublicKey receiver account public key
- * @param token token to send address
- * @param amount amount in SOL
- * @returns transaction result
- */
-const transferSpl = async (
-  connection: Connection,
-  fromKeyPair: Keypair,
-  toPublicKey: PublicKey,
-  tokenAddress: string,
-  amount: number,
-) => {
-  const fromTokenAddress = await getAssociatedTokenAddress(
-    new PublicKey(tokenAddress),
-    fromKeyPair.publicKey,
-  );
-  const toTokenAddress: PublicKey = await getAssociatedTokenAddress(
-    new PublicKey(tokenAddress),
-    toPublicKey,
-  );
-  const token:IToken = await getTokenByAddress(tokenAddress);
-  const transferAmount = token.decimals ? applyDecimals(amount, token.decimals) : amount;
-
-  const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
-  if (!destTokenAccount) {
-    await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
-  }
-
-  const result = await transfer(
-    connection,
-    fromKeyPair,
-    fromTokenAddress,
-    toTokenAddress,
-    fromKeyPair.publicKey,
-    transferAmount,
-    [fromKeyPair],
-  );
+  const result = await execute(connection, transaction, fromKeyPair, simulate);
   return result;
 };
 
-/**
- * Sends SOL between accounts
- *
- * @param fromKeyPair sender account key pair
- * @param toPublicKey receiver account public key
- * @param amount amount in SOL
- * @param opts simulate: simulates the transaction
- * @returns transaction result
- */
-const transferSol = async (
-  connection: Connection,
-  fromKeyPair: Keypair,
-  toPublicKey: PublicKey,
-  amount: number,
-) => {
-  const transaction = new Transaction().add(
+const transactionSol = async (connection, fromKeyPair, toPublicKey, amount, opts = {}) => {
+  const { simulate } = opts;
+  const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  const transaction = new Transaction({ feePayer: fromKeyPair.publicKey, recentBlockhash }).add(
     SystemProgram.transfer({
       fromPubkey: fromKeyPair.publicKey,
       toPubkey: toPublicKey,
       lamports: LAMPORTS_PER_SOL * amount,
     }),
   );
-  const result = await execute(connection, transaction, fromKeyPair);
-  return result ? result.txid : undefined;
+  return transaction;
+};
+
+const transactionSpl = async (
+  connection,
+  fromKeyPair,
+  toPublicKey,
+  tokenAddress,
+  amount,
+  opts = {},
+) => {
+  const { simulate } = opts;
+  const fromTokenAddress = await getAssociatedTokenAddress(
+    new PublicKey(tokenAddress),
+    fromKeyPair.publicKey,
+  );
+  const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
+  const token = await getTokenByAddress(tokenAddress);
+  const transferAmount = token.decimals ? applyDecimals(amount, token.decimals) : amount;
+  const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
+  if (!destTokenAccount) {
+    console.log('creating token account');
+    const ta = await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
+    console.log(`Token account: ${ta}`);
+  }
+  const transaction = new Transaction().add(
+    createTransferInstruction(
+      fromTokenAddress,
+      toTokenAddress,
+      fromKeyPair.publicKey,
+      transferAmount,
+      [],
+      TOKEN_PROGRAM_ID,
+    ),
+  );
+  const latestBlockHash = await connection.getLatestBlockhash();
+  transaction.recentBlockhash = latestBlockHash.blockhash;
+  transaction.feePayer = fromKeyPair.publicKey;
+  return transaction;
+};
+
+const execute = async (connection, transaction, keyPair, simulate) => {
+  let result = null;
+  if (simulate) {
+    result = await connection.simulateTransaction(transaction, [keyPair]);
+  } else {
+    result = await sendTransaction(connection, transaction, keyPair);
+  }
+  return result;
+};
+
+const sendTransaction = async (connection, transaction, keyPair) => {
+  const txid = await connection.sendTransaction(transaction, [keyPair], {
+    skipPreflight: true,
+  });
+  return txid;
+};
+
+const estimateFee = async (connection, fromKeyPair, toPublicKey, token, amount) => {
+  let transaction;
+  if (token == SOL_ADDRESS) {
+    transaction = await transactionSol(connection, fromKeyPair, toPublicKey, amount);
+  } else {
+    transaction = await transactionSpl(connection, fromKeyPair, toPublicKey, token, amount);
+  }
+  return await transaction.getEstimatedFee(connection);
+};
+
+const confirmTransaction = async (connection, txId) => {
+  return await connection.confirmTransaction(txId);
 };
 
 const airdrop = async (connection: Connection, publicKey: PublicKey, amount: number) => {
@@ -106,8 +118,9 @@ const airdrop = async (connection: Connection, publicKey: PublicKey, amount: num
   return connection.confirmTransaction(airdropSignature);
 };
 
-export {
-  transferSol,
-  transferSpl,
+module.exports = {
+  estimateFee,
+  createTransaction,
+  confirmTransaction,
   airdrop,
 };
