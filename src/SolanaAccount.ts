@@ -160,9 +160,9 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return swapService.executeTransaction(connection, txId);
   }
 
-  async getRecentTransactions(lastSignature) {
+  async getRecentTransactions(lastSignature: string) {
     const connection:Connection = await this.getConnection();
-    if (this.signatures === null) {
+    if (this.signatures === undefined) {
       this.signatures = await connection.getSignaturesForAddress(this.publicKey);
     }
     return recentTransactionsService.list(

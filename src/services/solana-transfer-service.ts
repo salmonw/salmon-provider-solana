@@ -2,6 +2,8 @@ import {
   LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey, Connection, Keypair,
 } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, createTransferInstruction } from '@solana/spl-token';
+import { IToken } from '@salmonw/provider-base';
+import { IOpts } from '../types/transfer';
 
 import {
   getAssociatedTokenAddress,
@@ -41,9 +43,9 @@ const transactionSpl = async (
     fromKeyPair.publicKey,
   );
   const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
-  const token = await getTokenByAddress(tokenAddress);
-  const tokenDecimals: number = token.decimals;
-  const transferAmount = token.decimals ? applyDecimals(amount, tokenDecimals) : amount;
+  const token: IToken = await getTokenByAddress(tokenAddress);
+  const { decimals } = token;
+  const transferAmount = decimals ? applyDecimals(amount, decimals) : amount;
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
   if (!destTokenAccount) {
     console.log('creating token account');
@@ -88,17 +90,13 @@ const execute = async (
     : sendTransaction(connection, transaction, keyPair);
 };
 
-interface OptInfo {
-  simulate: boolean
-}
-
 const createTransaction = async (
   connection: Connection,
   fromKeyPair: Keypair,
   toPublicKey: PublicKey,
   token: string,
   amount: number,
-  opts: OptInfo,
+  opts: IOpts,
 ) => {
   const { simulate } = opts;
   let transaction: Transaction;
