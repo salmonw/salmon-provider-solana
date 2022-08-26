@@ -65,7 +65,7 @@ interface IData {
 // }
 
 interface ISignature extends ConfirmedSignatureInfo {
-  data: ParsedTransactionWithMeta
+  data?: ParsedTransactionWithMeta
 }
 
 interface IOpts {
