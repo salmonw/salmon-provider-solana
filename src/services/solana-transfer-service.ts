@@ -1,9 +1,14 @@
 import {
-  LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey, Connection, Keypair, SignatureResult, RpcResponseAndContext,
+  LAMPORTS_PER_SOL,
+  Transaction,
+  SystemProgram,
+  PublicKey,
+  Connection,
+  Keypair,
+  SignatureResult,
 } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, createTransferInstruction } from '@solana/spl-token';
 import { IToken } from '@salmonw/provider-base';
-import { IOpts } from '../types/transfer';
 import {
   getAssociatedTokenAddress,
   getTokenAccount,
@@ -48,9 +53,7 @@ const transactionSpl = async (
   const transferAmount = decimals ? applyDecimals(amount, decimals) : amount;
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
   if (!destTokenAccount) {
-    console.log('creating token account');
-    const ta = await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
-    console.log(`Token account: ${JSON.stringify(ta)}`);
+    await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
   }
   const transaction = new Transaction().add(
     createTransferInstruction(

@@ -53,9 +53,9 @@ const getBalance = async (connection: Connection, publicKey: PublicKey) :Promise
   const prices:ICoin[] = await getPricesByPlatform(SOLANA_PLATFORM);
   const balances:IBalanceItem[] = decorateBalancePrices([solanaBalance, ...tokensBalance], prices);
   const sortedBalances:IBalanceItem[] = balances
-    .sort((a, b) => (a.usdBalance || 0) - (b.usdBalance || 0));
+    .sort((a, b) => (a.usdBalance ?? 0) - (b.usdBalance ?? 0));
   const usdTotal:number = balances.reduce(
-    (currentValue, next) => (next.usdBalance || 0) + currentValue,
+    (currentValue, next) => (next.usdBalance ?? 0) + currentValue,
     0,
   );
   const last24HoursChange:IBalancePrice = getLast24HoursChange(balances, usdTotal);

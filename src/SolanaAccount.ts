@@ -4,7 +4,7 @@ import {
 } from '@solana/web3.js';
 import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SOLANA } from './constants/solana-constants';
-import { ISignature } from './types/transfer';
+import { ISignature, ISignature } from './types/transfer';
 import * as nftService from './services/solana-nft-service';
 import * as balanceService from './services/solana-balance-service';
 import * as tokenListService from './services/solana-token-list-service';
@@ -16,7 +16,6 @@ import * as validationService from './services/solana-validation-service';
 import * as configService from './services/solana-config-service';
 import * as recentTransactionsService from './services/solana-recent-transactions-service';
 import * as seedService from './services/solana-seed-service';
-import { ISignature } from './types/transfer';
 
 class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
   static DERIVED_COUNT = 10;

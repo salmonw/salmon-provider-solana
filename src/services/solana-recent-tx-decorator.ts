@@ -32,9 +32,9 @@ const decorateRecentTransactions = async (
 
   const lamportsAmount = txMsg.instructions[1]?.parsed?.info?.lamports
     || txMsg.instructions[0]?.parsed?.info?.lamports
-    || txMeta.innerInstructions[0]?.instructions[0]?.parsed?.info?.lamports;
+    || txMeta.innerInstructions[0].instructions[0]?.parsed?.info?.lamports;
 
-  const nftAddress = txMeta.innerInstructions[0]?.instructions?.filter(
+  const nftAddress = txMeta.innerInstructions[0].instructions.filter(
     (ins) => ins.parsed?.info?.owner === publicKey.toBase58() && ins.parsed?.info?.mint,
   )[0]?.parsed?.info?.mint;
 
@@ -47,7 +47,7 @@ const decorateRecentTransactions = async (
 
   const swapOut = txMeta.innerInstructions.length && txMeta.innerInstructions[
     txMeta.innerInstructions.length - 1
-  ]?.instructions?.filter((ins) => ins.parsed)[0].parsed?.info;
+  ].instructions.filter((ins) => ins.parsed)[0].parsed?.info;
 
   const tokenInfoIn: IToken = await
   getTokenInfo(swapIn?.destination || swapIn?.mint, connection);
@@ -83,7 +83,7 @@ const decorateRecentTransactions = async (
     ? 'swap'
     : txMsg.instructions[0]?.parsed?.type
         || txMsg.instructions[1]?.parsed?.type
-        || txMeta.innerInstructions[0]?.instructions[0]?.parsed?.type
+        || txMeta.innerInstructions[0].instructions[0]?.parsed?.type
         || 'transfer';
   const transferType = ((type === 'transfer'
     || type === 'createAccount'
