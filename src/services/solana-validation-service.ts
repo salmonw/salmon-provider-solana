@@ -19,7 +19,7 @@ const VALID_ACCOUNT = {
 };
 
 const validateDestinationAccount = async (connection: Connection, address: string) => {
-  let publicKey: PublicKey = null;
+  let publicKey: PublicKey;
   try {
     publicKey = new PublicKey(address);
   } catch {

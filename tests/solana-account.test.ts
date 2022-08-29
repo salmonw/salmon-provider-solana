@@ -72,7 +72,7 @@ test('solana-set-network', async () => {
 
 test('solana-get-transactions', async () => {
   const account = SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
-  const transactions = await account.getRecentTransactions(null);
+  const transactions = await account.getRecentTransactions(undefined);
   // console.log(transactions, '', 4);
   // const size = transactions.filter((t) => t.data).length;
   expect(transactions.length).toBe(8);

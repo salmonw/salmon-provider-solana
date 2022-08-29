@@ -1,5 +1,7 @@
 import { Account } from '@salmonw/provider-base';
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import {
+  Connection, PublicKey, Keypair, SignatureResult,
+} from '@solana/web3.js';
 import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SOLANA } from './constants/solana-constants';
 import * as nftService from './services/solana-nft-service';
@@ -13,11 +15,12 @@ import * as validationService from './services/solana-validation-service';
 import * as configService from './services/solana-config-service';
 import * as recentTransactionsService from './services/solana-recent-transactions-service';
 import * as seedService from './services/solana-seed-service';
+import { ISignature } from './types/transfer';
 
 class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
   static DERIVED_COUNT = 10;
 
-  signatures?: object[];
+  signatures?: ISignature[];
 
   publicKey: PublicKey;
 
@@ -128,7 +131,18 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     );
   }
 
-  async createTransferTransaction(destination: string, token: string, amount: number, opts = {}) {
+  async transfer(destination: string, token: string, amount: number) {
+    const txId = await this.createTransferTransaction(destination, token, amount);
+    const txResult = this.confirmTransferTransaction(txId);
+    console.log(txResult);
+    return '';
+  }
+
+  async createTransferTransaction(
+    destination: string,
+    token: string,
+    amount: number,
+  ):Promise<string> {
     const connection = await this.getConnection();
     return transferService.createTransaction(
       connection,
@@ -136,7 +150,6 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
       new PublicKey(destination),
       token,
       amount,
-      opts,
     );
   }
 
@@ -160,7 +173,7 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return swapService.executeTransaction(connection, txId);
   }
 
-  async getRecentTransactions(lastSignature: string) {
+  async getRecentTransactions(lastSignature: string | undefined) {
     const connection:Connection = await this.getConnection();
     if (this.signatures === undefined) {
       this.signatures = await connection.getSignaturesForAddress(this.publicKey);

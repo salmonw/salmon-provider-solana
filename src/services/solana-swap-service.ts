@@ -31,8 +31,10 @@ const quote = async (
   slippage :number,
 ) => {
   const tokens:IToken[] = await getTokenList();
-  const inToken:IToken = tokens.find((t:IToken) => t.address === inAdress);
-  const outToken:IToken = tokens.find((t) => t.address === outAdress);
+  const inToken:IToken | undefined = tokens.find((t:IToken) => t.address === inAdress);
+  if (inToken === undefined) throw (Error('in token undefined'));
+  const outToken:IToken | undefined = tokens.find((t) => t.address === outAdress);
+  if (outToken === undefined) throw (Error('in token undefined'));
   const inputAmount = applyDecimals(amount, inToken.decimals);
   const url = `${SALMON_API_URL}/v1/solana/ft/swap/quote?inputMint=${inAdress}&outputMint=${outAdress}&amount=${inputAmount}&slippage=${slippage}`;
   const response = await axios.get(url, { headers: { 'X-Network-Id': networkId } });

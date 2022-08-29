@@ -46,12 +46,12 @@ async function getTokensByOwner(
   return result;
 }
 
-async function getTokenBySymbol(symbol: string): Promise<IToken> {
+async function getTokenBySymbol(symbol: string): Promise<IToken | undefined> {
   const tokens: IToken[] = await getTokenList();
   return tokens.find((t: IToken) => t.symbol === symbol);
 }
 
-async function getTokenByAddress(address: string): Promise<IToken> {
+async function getTokenByAddress(address: string): Promise<IToken | undefined> {
   const tokens = await getTokenList();
   return tokens.find((t: IToken) => t.address === address);
 }

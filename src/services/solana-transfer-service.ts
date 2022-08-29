@@ -1,10 +1,9 @@
 import {
-  LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey, Connection, Keypair,
+  LAMPORTS_PER_SOL, Transaction, SystemProgram, PublicKey, Connection, Keypair, SignatureResult, RpcResponseAndContext,
 } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, createTransferInstruction } from '@solana/spl-token';
 import { IToken } from '@salmonw/provider-base';
 import { IOpts } from '../types/transfer';
-
 import {
   getAssociatedTokenAddress,
   getTokenAccount,
@@ -43,7 +42,8 @@ const transactionSpl = async (
     fromKeyPair.publicKey,
   );
   const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
-  const token: IToken = await getTokenByAddress(tokenAddress);
+  const token: IToken | undefined = await getTokenByAddress(tokenAddress);
+  if (token === undefined) throw Error('unknown token');
   const { decimals } = token;
   const transferAmount = decimals ? applyDecimals(amount, decimals) : amount;
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
@@ -72,22 +72,11 @@ const sendTransaction = async (
   connection: Connection,
   transaction: Transaction,
   keyPair: Keypair,
-) => {
-  const txid = await connection.sendTransaction(transaction, [keyPair], {
+) :Promise<string> => {
+  const txid: string = await connection.sendTransaction(transaction, [keyPair], {
     skipPreflight: true,
   });
   return txid;
-};
-
-const execute = async (
-  connection: Connection,
-  transaction: Transaction,
-  keyPair: Keypair,
-  simulate: boolean,
-) => {
-  return simulate
-    ? connection.simulateTransaction(transaction, [keyPair])
-    : sendTransaction(connection, transaction, keyPair);
 };
 
 const createTransaction = async (
@@ -96,16 +85,14 @@ const createTransaction = async (
   toPublicKey: PublicKey,
   token: string,
   amount: number,
-  opts: IOpts,
-) => {
-  const { simulate } = opts;
+): Promise<string> => {
   let transaction: Transaction;
   if (token === SOL_ADDRESS) {
     transaction = await transactionSol(connection, fromKeyPair, toPublicKey, amount);
   } else {
     transaction = await transactionSpl(connection, fromKeyPair, toPublicKey, token, amount);
   }
-  const result = await execute(connection, transaction, fromKeyPair, simulate);
+  const result = await sendTransaction(connection, transaction, fromKeyPair);
   return result;
 };
 
@@ -125,13 +112,18 @@ const estimateFee = async (
   return transaction.getEstimatedFee(connection);
 };
 
-const confirmTransaction = async (connection: Connection, txId: string) => {
-  return connection.confirmTransaction(txId);
+const confirmTransaction = async (
+  connection: Connection,
+  txId: string,
+):Promise<SignatureResult> => {
+  const { value } = await connection.confirmTransaction(txId);
+  return value;
 };
 
 const airdrop = async (connection: Connection, publicKey: PublicKey, amount: number) => {
   const airdropSignature = await connection.requestAirdrop(publicKey, amount * LAMPORTS_PER_SOL);
-  return connection.confirmTransaction(airdropSignature);
+  const result = await connection.confirmTransaction(airdropSignature);
+  return result;
 };
 
 export {

@@ -12,8 +12,10 @@ const getAll = async (networkId, publicKey, noCache = false): Promise<INft[]> =>
   return data;
 };
 
-const getCollections = (nfts: INft[]):string[] => {
-  const collections = nfts.map((nft) => nft.collection.name).filter((e) => e !== undefined);
+const getCollections = (nfts: INft[]):(string | null)[] => {
+  const collections:(string | null)[] = nfts.map((nft) => {
+    return nft.collection ? nft.collection.name : null;
+  }).filter((e) => e !== null);
   return Array.from(new Set(collections));
 };
 
@@ -21,8 +23,10 @@ const getNftsByCollection = (nfts: INft[]) => {
   const collections = getCollections(nfts);
   return collections
     .map((collection) => {
-      const items = nfts.filter((nft) => nft.collection.name === collection);
-      const { length } = items;
+      const items: INft[] = nfts.filter((nft) => {
+        return nft.collection ? nft.collection.name === collection : false;
+      });
+      const length = items.length || 0;
       return {
         collection,
         length,
@@ -42,15 +46,15 @@ const getAllGroupedByCollection = async (networkId, owner) => {
   return [...nftsByCollection, ...nftsWithoutCollection];
 };
 
-const getNftByAddress = async (mintAddress: string) :Promise<INft> => {
+const getNftByAddress = async (mintAddress: string) :Promise<INft | undefined> => {
   try {
     const { data } : { data: INft } = await axios.get(`${SALMON_API_URL}/v1/solana/nft/${mintAddress}`);
     if (data.collection) {
       return data;
     }
-    return null;
+    return undefined;
   } catch (e) {
-    return null;
+    return undefined;
   }
 };
 

@@ -33,12 +33,10 @@ test.only('solana-transfer-sol', async () => {
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 0.2;
-  const opts = { simulate: false };
   const result1 = await account1.createTransferTransaction(
     account2.publicKey.toBase58(),
     SOL_ADDRESS,
     amount,
-    opts,
   );
   expect(result1).toBeDefined();
   console.log(`Transaction sign ${JSON.stringify(result1)}`);
@@ -46,7 +44,27 @@ test.only('solana-transfer-sol', async () => {
     account1.publicKey.toBase58(),
     SOL_ADDRESS,
     amount,
-    opts,
+  );
+  expect(result2).toBeDefined();
+  console.log(`Transaction sign ${JSON.stringify(result2)}`);
+});
+
+test.only('solana--create-transfer-token', async () => {
+  const accounts = SolanaAccount.restoreDerivedAccounts(MNEMONIC, NETWORK_ID);
+  const account1 = accounts[0];
+  const account2 = accounts[1];
+  const amount = 11;
+  const result1 = await account1.createTransferTransaction(
+    account2.publicKey.toBase58(),
+    TOKEN_ADDRESS,
+    amount,
+  );
+  expect(result1).toBeDefined();
+  console.log(`Transaction sign ${JSON.stringify(result1)}`);
+  const result2 = await account2.createTransferTransaction(
+    account1.publicKey.toBase58(),
+    TOKEN_ADDRESS,
+    amount,
   );
   expect(result2).toBeDefined();
   console.log(`Transaction sign ${JSON.stringify(result2)}`);
@@ -57,20 +75,17 @@ test.only('solana-transfer-token', async () => {
   const account1 = accounts[0];
   const account2 = accounts[1];
   const amount = 11;
-  const opts = { simulate: false };
-  const result1 = await account1.createTransferTransaction(
+  const result1 = await account1.transfer(
     account2.publicKey.toBase58(),
     TOKEN_ADDRESS,
     amount,
-    opts,
   );
   expect(result1).toBeDefined();
   console.log(`Transaction sign ${JSON.stringify(result1)}`);
-  const result2 = await account2.createTransferTransaction(
+  const result2 = await account2.transfer(
     account1.publicKey.toBase58(),
     TOKEN_ADDRESS,
     amount,
-    opts,
   );
   expect(result2).toBeDefined();
   console.log(`Transaction sign ${JSON.stringify(result2)}`);

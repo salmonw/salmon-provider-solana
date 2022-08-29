@@ -4,13 +4,13 @@ import {
   decorateBalancePrices,
   getLast24HoursChange,
   getPricesByPlatform,
-  SOLANA_PLATFORM,
+  IBalance,
   IBalanceItem,
+  IBalancePrice,
+  ICoin,
   IToken,
   ITokenBalance,
-  ICoin,
-  IBalance,
-  IBalancePrice,
+  SOLANA_PLATFORM,
 } from '@salmonw/provider-base';
 import { getTokensByOwner, getTokenList } from './solana-token-list-service';
 import {
@@ -23,7 +23,7 @@ const getSolanaBalance = async (
 ):Promise<IBalanceItem> => {
   const balance:number = await connection.getBalance(publicKey);
   const uiAmount = balance / LAMPORTS_PER_SOL;
-  const result:IBalanceItem = {
+  return {
     mint: publicKey.toBase58(),
     owner: publicKey.toBase58(),
     amount: balance,
@@ -34,7 +34,6 @@ const getSolanaBalance = async (
     logo: SOL_LOGO,
     address: publicKey.toBase58(),
   };
-  return result;
 };
 
 const getTokensBalance = async (
@@ -45,8 +44,7 @@ const getTokensBalance = async (
   const notEmptyTokens:ITokenBalance[] = ownerTokens
     .filter((t) => t.amount && t.amount > 0);
   const tokens: IToken[] = await getTokenList();
-  const result :IBalanceItem[] = decorateBalanceList(notEmptyTokens, tokens);
-  return result;
+  return decorateBalanceList(notEmptyTokens, tokens);
 };
 
 const getBalance = async (connection: Connection, publicKey: PublicKey) :Promise<IBalance> => {
@@ -54,7 +52,8 @@ const getBalance = async (connection: Connection, publicKey: PublicKey) :Promise
   const solanaBalance:IBalanceItem = await getSolanaBalance(connection, publicKey);
   const prices:ICoin[] = await getPricesByPlatform(SOLANA_PLATFORM);
   const balances:IBalanceItem[] = decorateBalancePrices([solanaBalance, ...tokensBalance], prices);
-  const sortedBalances:IBalanceItem[] = balances.sort((a, b) => a.usdBalance - b.usdBalance);
+  const sortedBalances:IBalanceItem[] = balances
+    .sort((a, b) => (a.usdBalance || 0) - (b.usdBalance || 0));
   const usdTotal:number = balances.reduce(
     (currentValue, next) => (next.usdBalance || 0) + currentValue,
     0,
