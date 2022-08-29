@@ -4,6 +4,7 @@ import {
 } from '@solana/web3.js';
 import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SOLANA } from './constants/solana-constants';
+import { ISignature } from './types/transfer';
 import * as nftService from './services/solana-nft-service';
 import * as balanceService from './services/solana-balance-service';
 import * as tokenListService from './services/solana-token-list-service';
