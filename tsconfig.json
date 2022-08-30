@@ -1,23 +1,23 @@
 {
-    "compileOnSave": false,
-    "compilerOptions": {
-      "outDir": "./lib",
-      "allowJs": true,
-      "sourceMap": true,
-      "declaration": false,
-      "strictNullChecks": true,
-      "moduleResolution": "node",
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "target": "es6",
-      "typeRoots": [
-        "node_modules/@types"
-      ],
-      "lib": [
-        "es2017",
-        "dom"
-      ]     
-    },
-    "exclude": ["lib/**", "babel.config.js", "jest.config.js"]
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "./lib",
+    "allowJs": true,
+    "sourceMap": true,
+    "declaration": false,
+    "strictNullChecks": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es6",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2017",
+      "dom"
+    ]     
+  },
+  "exclude": ["lib/**", "babel.config.js", "jest.config.js"]
 
-  }
+}

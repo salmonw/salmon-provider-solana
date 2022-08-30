@@ -1,98 +1,159 @@
 import {
-  Connection, PublicKey, ParsedAccountData, AccountInfo, RpcResponseAndContext,
+  Connection,
+  PublicKey,
+  ParsedAccountData,
+  AccountInfo,
+  RpcResponseAndContext,
+  ParsedTransactionMeta,
 } from '@solana/web3.js';
 import { IToken } from '@salmonw/provider-base';
 import * as tokenListService from './solana-token-list-service';
 import * as nftService from './solana-nft-service';
 import {
-  ISignature, ITokenAccount, IInsParsed, IInsParsedInfo,
+  ISignature,
+  IInsParsed,
+  IInsParsedInfo,
+  IMessage,
+  IInstruction,
 } from '../types/transfer';
 
-const getTokenInfo = async (tokenAddress: string, connection: Connection) => {
-  const tokenAccount: RpcResponseAndContext<AccountInfo<Buffer | ParsedAccountData>> = tokenAddress
-    && (await connection.getParsedAccountInfo(new PublicKey(tokenAddress)));
-  const tokenData: Buffer | ParsedAccountData = tokenAccount && tokenAccount.value.data;
-  const tokenParsed: IInsParsed = tokenData && tokenData.parsed;
-  const tokenParsedInfo: IInsParsedInfo = tokenParsed && tokenParsed.info;
-
-  if (tokenParsedInfo) {
-    return tokenListService.getTokenByAddress(tokenParsedInfo.mint);
+const getTokenInfo = async (tokenAddress: string | null, connection: Connection) => {
+  let tokenAccount: RpcResponseAndContext<AccountInfo<Buffer | ParsedAccountData> | null>;
+  if (tokenAddress) {
+    tokenAccount = await
+    connection.getParsedAccountInfo(new PublicKey(tokenAddress));
+    let tokenData: Buffer | ParsedAccountData | null;
+    if (tokenAccount.value) {
+      tokenData = tokenAccount.value.data;
+      const tokenParsed: IInsParsed = tokenData.parsed;
+      const tokenParsedInfo: IInsParsedInfo = tokenParsed.info;
+      return tokenListService.getTokenByAddress(tokenParsedInfo.mint);
+    }
   }
   return null;
 };
+
+const getNftInfo = async (metaFirstIns: IInstruction[] | undefined, publicKey: PublicKey) => {
+  if (metaFirstIns && metaFirstIns.length) {
+    const nftAddress = metaFirstIns.filter(
+      (ins) => ins.parsed && ins.parsed.info.owner === publicKey.toBase58() && ins.parsed.info.mint,
+    )[0]?.parsed?.info?.mint;
+    if (nftAddress) {
+      return nftService.getNftByAddress(nftAddress);
+    }
+  }
+  return null;
+};
+
+const getSwapInfo = (txMeta: ParsedTransactionMeta | null, isOut: boolean) => {
+  if (txMeta.innerInstructions.length) {
+    if (!isOut) {
+      const swapInRaw = txMeta.innerInstructions
+        .pop()
+        .instructions.filter((ins: IInstruction) => ins.parsed)
+        .pop();
+      const swapInIns: IInstruction | undefined = swapInRaw;
+      return swapInIns.parsed.info;
+    }
+    const swapOutRaw = txMeta.innerInstructions[
+      txMeta.innerInstructions.length - 1
+    ].instructions.filter((ins: IInstruction) => ins.parsed);
+    const swapOutIns: IInstruction = swapOutRaw[0];
+    return swapOutIns.parsed.info;
+  }
+  return null;
+};
+
+const getSource = (txMsg: IMessage) => txMsg.instructions[0]?.parsed?.info?.source
+|| txMsg.instructions[1]?.parsed?.info?.source;
+
+const getDestination = (txMsg: IMessage) => txMsg.instructions.filter(
+  (ins) => ins.parsed && ins.parsed.type === 'transfer',
+)[0]?.parsed?.info?.destination
+  || txMsg.instructions[0]?.parsed?.info?.destination
+  || txMsg.instructions[1]?.parsed?.info?.destination
+  || txMsg.instructions[2]?.parsed?.info?.destination;
+
+const getLamportsAmount = (txMsg: IMessage, metaFirstIns: IInstruction[]
+| undefined) => txMsg.instructions[1]?.parsed?.info?.lamports
+|| txMsg.instructions[0]?.parsed?.info?.lamports
+|| (metaFirstIns && metaFirstIns[0]?.parsed?.info?.lamports);
+
+const getTokenAddress = (swap: IInsParsedInfo | null) => swap && (swap.destination || swap.mint);
+
+const getType = (
+  txMsg: IMessage,
+  metaFirstIns: IInstruction[] | undefined,
+  swapInfoOut: IToken | null,
+  swapInfoIn: IToken | null,
+  isSwap: boolean | void,
+) => (swapInfoOut || swapInfoIn || isSwap
+  ? 'swap'
+  : txMsg.instructions[0]?.parsed?.type
+      || txMsg.instructions[1]?.parsed?.type
+      || (metaFirstIns && metaFirstIns[0]?.parsed?.type)
+      || 'transfer');
+
+const getTransferType = (
+  type: string,
+  publicKey: PublicKey,
+  source: string | undefined,
+) => (((type === 'transfer'
+  || type === 'createAccount'
+  || type === 'createAccount'
+  || type === 'create')
+    && publicKey.toBase58() === source)
+  || !source
+  ? 'sent'
+  : 'received');
+
+const getTransferAmount = (
+  txMeta: ParsedTransactionMeta | null,
+  publicKey: PublicKey,
+) => txMeta.postTokenBalances.filter(
+  (bal) => bal.owner === publicKey.toBase58(),
+)[0]?.uiTokenAmount?.uiAmount
+    || txMeta.preTokenBalances.filter((bal) => bal.owner === publicKey.toBase58())[0]?.uiTokenAmount
+      ?.uiAmount;
+
+const getSwapType = (
+  txMeta: ParsedTransactionMeta | null,
+) => txMeta.logMessages.forEach((msg, i) => {
+  if (JSON.stringify(msg).includes('SetTokenLedger')
+  || (i === 0 && JSON.stringify(msg).includes('Program JUP2'))) {
+    return true;
+  }
+  return false;
+});
 
 const decorateRecentTransactions = async (
   transaction: ISignature,
   connection: Connection,
   publicKey: PublicKey,
 ) => {
-  console.log('t', JSON.stringify(transaction));
-  const txMeta = transaction.data.meta;
-  const txMsg = transaction.data.transaction.message;
+  const txMeta: ParsedTransactionMeta | null = transaction.data.meta;
+  const txMsg: IMessage = transaction.data.transaction.message;
+  const metaFirstIns: IInstruction[] | undefined = txMeta.innerInstructions.length
+    ? txMeta.innerInstructions[0].instructions : undefined;
 
-  const lamportsAmount = txMsg.instructions[1]?.parsed?.info?.lamports
-    || txMsg.instructions[0]?.parsed?.info?.lamports
-    || txMeta.innerInstructions[0].instructions[0]?.parsed?.info?.lamports;
-
-  const nftAddress = txMeta.innerInstructions[0].instructions.filter(
-    (ins) => ins.parsed?.info?.owner === publicKey.toBase58() && ins.parsed?.info?.mint,
-  )[0]?.parsed?.info?.mint;
-
-  const nftInfo = nftAddress && (await nftService.getNftByAddress(nftAddress));
-
-  const swapIn = txMeta.innerInstructions.length && txMeta.innerInstructions
-    .pop()
-    .instructions.filter((ins) => ins.parsed)
-    .pop().parsed?.info;
-
-  const swapOut = txMeta.innerInstructions.length && txMeta.innerInstructions[
-    txMeta.innerInstructions.length - 1
-  ].instructions.filter((ins) => ins.parsed)[0].parsed?.info;
-
-  const tokenInfoIn: IToken = await
-  getTokenInfo(swapIn?.destination || swapIn?.mint, connection);
-  const tokenInfoOut: IToken = await
-  getTokenInfo(swapOut?.destination || swapOut?.mint, connection);
-
-  const transferInfoIn: IToken = await tokenListService.getTokenByAddress(swapIn?.mint);
-  const transferInfoOut: IToken = await tokenListService.getTokenByAddress(swapOut?.mint);
-
-  const transferAmount = txMeta.postTokenBalances.filter((bal) => bal.owner === publicKey.toBase58())[0]?.uiTokenAmount
-    ?.uiAmount
-    || txMeta.preTokenBalances.filter((bal) => bal.owner === publicKey.toBase58())[0]?.uiTokenAmount
-      ?.uiAmount;
-
-  const source = txMsg.instructions[0]?.parsed?.info?.source || txMsg.instructions[1]?.parsed?.info?.source;
-  const destination = txMsg.instructions.filter((ins) => ins.parsed.type === 'transfer')[0]?.parsed?.info
-    ?.destination
-    || txMsg.instructions[0]?.parsed?.info?.destination
-    || txMsg.instructions[1]?.parsed?.info?.destination
-    || txMsg.instructions[2]?.parsed?.info?.destination;
-
-  let isSwap = false;
-  txMeta.logMessages.map((msg, i) => {
-    if (JSON.stringify(msg).includes('SetTokenLedger')) {
-      isSwap = true;
-    }
-    if (i === 0 && JSON.stringify(msg).includes('Program JUP2')) {
-      isSwap = true;
-    }
-  });
-
-  const type = tokenInfoOut || tokenInfoIn || isSwap
-    ? 'swap'
-    : txMsg.instructions[0]?.parsed?.type
-        || txMsg.instructions[1]?.parsed?.type
-        || txMeta.innerInstructions[0].instructions[0]?.parsed?.type
-        || 'transfer';
-  const transferType = ((type === 'transfer'
-    || type === 'createAccount'
-    || type === 'createAccount'
-    || type === 'create')
-      && publicKey.toBase58() === source)
-    || !source
-    ? 'sent'
-    : 'received';
+  const source = getSource(txMsg);
+  const destination = getDestination(txMsg);
+  const lamportsAmount = getLamportsAmount(txMsg, metaFirstIns);
+  const nftInfo = await getNftInfo(metaFirstIns, publicKey);
+  const swapIn = getSwapInfo(txMeta, false);
+  const swapOut = getSwapInfo(txMeta, true);
+  const swapInfoIn: IToken | null = await
+  getTokenInfo(getTokenAddress(swapIn), connection);
+  const swapInfoOut: IToken | null = await
+  getTokenInfo(getTokenAddress(swapOut), connection);
+  const transferInfoIn: IToken | null = swapIn && await
+  tokenListService.getTokenByAddress(swapIn.mint);
+  const transferInfoOut: IToken | null = swapOut && await
+  tokenListService.getTokenByAddress(swapOut.mint);
+  const transferAmount = getTransferAmount(txMeta, publicKey);
+  const isSwap = getSwapType(txMeta);
+  const type = getType(txMsg, metaFirstIns, swapInfoOut, swapInfoIn, isSwap);
+  const transferType = getTransferType(type, publicKey, source);
   const error = Boolean(transaction.err);
 
   return {
@@ -101,12 +162,12 @@ const decorateRecentTransactions = async (
     signature: transaction.signature,
     type,
     transferType,
-    ...(nftInfo && nftInfo.collection
+    ...(nftInfo
       ? { nftAmount: nftInfo }
       : lamportsAmount && {
-        amount: lamportsAmount / 1000000000,
+        amount: Number(lamportsAmount) / 1000000000,
       }),
-    ...(nftInfo && nftInfo.collection && { nftAmount: nftInfo }),
+    ...(nftInfo && { nftAmount: nftInfo }),
     ...(source && { source }),
     ...(destination && { destination }),
     ...(transferInfoIn && { transferNameIn: transferInfoIn.symbol }),
@@ -116,10 +177,10 @@ const decorateRecentTransactions = async (
     ...(transferAmount && { transferAmount }),
     ...(swapIn && { swapAmountIn: swapIn.amount }),
     ...(swapOut && { swapAmountOut: swapOut.amount }),
-    ...(tokenInfoIn && { tokenNameIn: tokenInfoIn.symbol }),
-    ...(tokenInfoOut && { tokenNameOut: tokenInfoOut.symbol }),
-    ...(tokenInfoIn && { tokenLogoIn: tokenInfoIn.logo }),
-    ...(tokenInfoOut && { tokenLogoOut: tokenInfoOut.logo }),
+    ...(swapInfoIn && { swapNameIn: swapInfoIn.symbol }),
+    ...(swapInfoOut && { swapNameOut: swapInfoOut.symbol }),
+    ...(swapInfoIn && { swapLogoIn: swapInfoIn.logo }),
+    ...(swapInfoOut && { swapLogoOut: swapInfoOut.logo }),
     ...(error && { error }),
   };
 };

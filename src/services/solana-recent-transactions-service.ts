@@ -1,4 +1,4 @@
-import { PublicKey, Connection } from '@solana/web3.js';
+import { PublicKey, Connection, ParsedTransactionWithMeta } from '@solana/web3.js';
 import { decorateRecentTransactions } from './solana-recent-tx-decorator';
 import { ISignature } from '../types/transfer';
 
@@ -16,7 +16,7 @@ const list = async (
     empty = signatures.slice(0, 8);
   }
 
-  let transactions = [];
+  let transactions: (ParsedTransactionWithMeta | null)[];
   const signArray: string[] = empty.map((item) => item.signature);
   await Promise.resolve(
     (transactions = await connection.getParsedConfirmedTransactions(signArray, 'finalized')),

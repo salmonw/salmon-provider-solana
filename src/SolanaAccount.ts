@@ -1,10 +1,8 @@
 import { Account } from '@salmonw/provider-base';
-import {
-  Connection, PublicKey, Keypair, SignatureResult,
-} from '@solana/web3.js';
+import { Connection, PublicKey, Keypair } from '@solana/web3.js';
 import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SOLANA } from './constants/solana-constants';
-import { ISignature, ISignature } from './types/transfer';
+import { ISignature } from './types/transfer';
 import * as nftService from './services/solana-nft-service';
 import * as balanceService from './services/solana-balance-service';
 import * as tokenListService from './services/solana-token-list-service';
@@ -120,7 +118,13 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return swapService.quote(this.networkId, inToken, outToken, amount, slippage);
   }
 
-  async estimateTransferFee(destination: string, token: string, amount: number) {
+  async transfer(destination: string, token: string, amount: number) {
+    const txId = await this.createTransferTransaction(destination, token, amount);
+    const txResult = this.confirmTransferTransaction(txId);
+    return txResult;
+  }
+
+  async estimateTransferFee(destination: string, token: string, amount: number): Promise<number> {
     const connection = await this.getConnection();
     return transferService.estimateFee(
       connection,
@@ -131,18 +135,11 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     );
   }
 
-  async transfer(destination: string, token: string, amount: number) {
-    const txId = await this.createTransferTransaction(destination, token, amount);
-    const txResult = this.confirmTransferTransaction(txId);
-    console.log(txResult);
-    return '';
-  }
-
   async createTransferTransaction(
     destination: string,
     token: string,
     amount: number,
-  ):Promise<string> {
+  ): Promise<string> {
     const connection = await this.getConnection();
     return transferService.createTransaction(
       connection,
@@ -173,7 +170,7 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
     return swapService.executeTransaction(connection, txId);
   }
 
-  async getRecentTransactions(lastSignature: string | undefined) {
+  async getRecentTransactions(lastSignature: string) {
     const connection:Connection = await this.getConnection();
     if (this.signatures === undefined) {
       this.signatures = await connection.getSignaturesForAddress(this.publicKey);

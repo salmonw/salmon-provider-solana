@@ -1,15 +1,19 @@
-import { ConfirmedSignatureInfo, ParsedTransactionWithMeta } from '@solana/web3.js';
-
-interface ITokenAccount {
-  value: { data: { info: IInsParsedInfo, type: string } }
-}
+import {
+  ConfirmedSignatureInfo,
+  ParsedTransactionWithMeta,
+  PublicKey,
+  LoadedAddresses,
+  ParsedInnerInstruction,
+  TokenBalance,
+} from '@solana/web3.js';
 
 interface IInsParsedInfo {
   source: string,
   destination: string,
   lamports: string,
   owner: string,
-  mint: string
+  mint: string,
+  amount: string
 }
 
 interface IInsParsed {
@@ -17,65 +21,41 @@ interface IInsParsed {
 }
 
 interface IInstruction {
-  parsed: { info: IInsParsedInfo, type: string },
-  program: string,
-  programId: string,
-}
-interface IMessage {
-  accountKeys: unknown[],
-  addressTableLookups: unknown[],
-  instructions: IInstruction[],
-  recentBlockhash: string,
+  parsed?: { info: IInsParsedInfo, type: string },
+  program?: string,
+  programId?: PublicKey,
 }
 
-interface ITransaction {
-  message: IMessage,
-  signatures: string[]
+interface IMessage {
+  accountKeys: unknown[],
+  addressTableLookups?: unknown[],
+  instructions: IInstruction[],
+  recentBlockhash: string,
 }
 
 interface IMeta {
   err: unknown,
   fee: number,
-  innerInstructions: unknown[],
-  loadedAddresses: unknown[],
-  logMessages: unknown[],
+  innerInstructions?: ParsedInnerInstruction[] | null,
+  loadedAddresses?: LoadedAddresses,
+  logMessages?: unknown[],
   postBalances: unknown[],
-  postTokenBalances: unknown[],
+  postTokenBalances?: TokenBalance[] | null,
   preBalances: unknown[],
-  preTokenBalances: unknown[],
-  rewards: unknown[],
-  status: unknown[]
+  preTokenBalances?: TokenBalance[] | null,
+  rewards?: unknown[],
+  status?: unknown[]
 }
-
-interface IData {
-  blockTime: number,
-  meta: IMeta,
-  slot: number,
-  transaction: ITransaction
-}
-
-// interface ISignature {
-//   blockTime: number,
-//   confirmationStatus: string,
-//   err: unknown,
-//   memo: unknown[],
-//   signature: string,
-//   slot: number,
-//   data: IData
-// }
 
 interface ISignature extends ConfirmedSignatureInfo {
-  data?: ParsedTransactionWithMeta
-}
-
-interface IOpts {
-  simulate: boolean
+  data?: ParsedTransactionWithMeta | null
 }
 
 export {
-  IOpts,
   ISignature,
-  ITokenAccount,
   IInsParsedInfo,
   IInsParsed,
+  IMessage,
+  IMeta,
+  IInstruction,
 };
