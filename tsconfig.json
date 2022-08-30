@@ -16,8 +16,12 @@
     "lib": [
       "es2017",
       "dom"
-    ]     
+    ]
   },
-  "exclude": ["lib/**", "babel.config.js", "jest.config.js"]
-
+  "exclude": [
+    "tests/**",
+    "lib/**",
+    "babel.config.js",
+    "jest.config.js"
+  ]
 }

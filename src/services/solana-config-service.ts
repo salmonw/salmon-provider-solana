@@ -2,7 +2,10 @@ import axios from 'axios';
 import { INetwork, INetworkConfigItem } from '@salmonw/provider-base/src/types/config';
 import { SALMON_API_URL } from '../constants/solana-constants';
 
-const getNetworks = async () :Promise<INetwork[]> => axios.get(`${SALMON_API_URL}/v1/solana/networks`);
+const getNetworks = async () :Promise<INetwork[]> => {
+  const { data } : { data:INetwork[] } = await axios.get(`${SALMON_API_URL}/v1/solana/networks`);
+  return data;
+};
 
 const getConfig = async (networkId):Promise<INetworkConfigItem> => {
   try {

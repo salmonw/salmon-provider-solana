@@ -50,6 +50,7 @@ test('solana-account-get-receive-address', () => {
 test('solana-get-networks', async () => {
   const account = SolanaAccount.restoreAccount(MNEMONIC, NETWORK_ID);
   const networks = await SolanaAccount.getNetworks();
+  console.log(networks);
   expect(networks).toBeDefined();
   expect(networks.length).toBeGreaterThan(0);
 });
