@@ -84,8 +84,8 @@ const getTokenAddress = (swap: IInsParsedInfo | null) => swap && (swap.destinati
 const getType = (
   txMsg: IMessage,
   metaFirstIns: IInstruction[] | undefined,
-  swapInfoOut: IToken | null,
-  swapInfoIn: IToken | null,
+  swapInfoOut: IToken | null | undefined,
+  swapInfoIn: IToken | null | undefined,
   isSwap: boolean | void,
 ) => (swapInfoOut || swapInfoIn || isSwap
   ? 'swap'
@@ -142,13 +142,13 @@ const decorateRecentTransactions = async (
   const nftInfo = await getNftInfo(metaFirstIns, publicKey);
   const swapIn = getSwapInfo(txMeta, false);
   const swapOut = getSwapInfo(txMeta, true);
-  const swapInfoIn: IToken | null = await
+  const swapInfoIn: IToken | null | undefined = await
   getTokenInfo(getTokenAddress(swapIn), connection);
-  const swapInfoOut: IToken | null = await
+  const swapInfoOut: IToken | null | undefined = await
   getTokenInfo(getTokenAddress(swapOut), connection);
-  const transferInfoIn: IToken | null = swapIn && await
+  const transferInfoIn: IToken | null | undefined = swapIn && await
   tokenListService.getTokenByAddress(swapIn.mint);
-  const transferInfoOut: IToken | null = swapOut && await
+  const transferInfoOut: IToken | null | undefined = swapOut && await
   tokenListService.getTokenByAddress(swapOut.mint);
   const transferAmount = getTransferAmount(txMeta, publicKey);
   const isSwap = getSwapType(txMeta);
