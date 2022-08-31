@@ -2,10 +2,16 @@ import {
   ConfirmedSignatureInfo,
   ParsedTransactionWithMeta,
   PublicKey,
-  LoadedAddresses,
-  ParsedInnerInstruction,
-  TokenBalance,
 } from '@solana/web3.js';
+
+interface IToken {
+  symbol: string,
+  name: string,
+  decimals: number,
+  logo: string,
+  address: string,
+  chainId: number
+}
 
 interface IInsParsedInfo {
   source: string,
@@ -17,7 +23,8 @@ interface IInsParsedInfo {
 }
 
 interface IInsParsed {
-  parsed: IInsParsedInfo
+  info: IInsParsedInfo,
+  type: string,
 }
 
 interface IInstruction {
@@ -33,29 +40,20 @@ interface IMessage {
   recentBlockhash: string,
 }
 
-interface IMeta {
-  err: unknown,
-  fee: number,
-  innerInstructions?: ParsedInnerInstruction[] | null,
-  loadedAddresses?: LoadedAddresses,
-  logMessages?: unknown[],
-  postBalances: unknown[],
-  postTokenBalances?: TokenBalance[] | null,
-  preBalances: unknown[],
-  preTokenBalances?: TokenBalance[] | null,
-  rewards?: unknown[],
-  status?: unknown[]
-}
-
 interface ISignature extends ConfirmedSignatureInfo {
   data?: ParsedTransactionWithMeta | null
 }
 
+interface ISignatureWithData extends ConfirmedSignatureInfo {
+  data: ParsedTransactionWithMeta
+}
+
 export {
+  IToken,
   ISignature,
+  ISignatureWithData,
   IInsParsedInfo,
   IInsParsed,
   IMessage,
-  IMeta,
   IInstruction,
 };

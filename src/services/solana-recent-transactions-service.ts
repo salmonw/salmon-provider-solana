@@ -1,6 +1,7 @@
 import { PublicKey, Connection, ParsedTransactionWithMeta } from '@solana/web3.js';
 import { decorateRecentTransactions } from './solana-recent-tx-decorator';
-import { ISignature } from '../types/transfer';
+import { notEmpty } from './solana-recent-tx-mapper';
+import { ISignature, ISignatureWithData } from '../types/transfer';
 
 const list = async (
   connection: Connection,
@@ -31,8 +32,10 @@ const list = async (
 
   return Promise.all(
     signatures
-      .filter((s) => s.data)
-      .map(async (transaction) => decorateRecentTransactions(transaction, connection, publicKey)),
+      .filter((s) => notEmpty(s.data))
+      .map(async (
+        transaction: ISignatureWithData,
+      ) => decorateRecentTransactions(transaction, connection, publicKey)),
   );
 };
 
