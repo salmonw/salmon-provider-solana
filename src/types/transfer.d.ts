@@ -16,6 +16,7 @@ interface IToken {
 interface IInsParsedInfo {
   source: string,
   destination: string,
+  authority: string,
   lamports: string,
   owner: string,
   mint: string,

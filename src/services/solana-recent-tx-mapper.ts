@@ -86,8 +86,9 @@ const getSwapInfo = (
   return null;
 };
 
-const getSource = (txMsg: IMessage) => txMsg.instructions[0]?.parsed?.info?.source
-?? txMsg.instructions[1]?.parsed?.info?.source;
+const getSource = (txMsg: IMessage) => txMsg.instructions[0]?.parsed?.info?.authority
+  ?? txMsg.instructions[0]?.parsed?.info?.source
+  ?? txMsg.instructions[1]?.parsed?.info?.source;
 
 const getDestination = (txMsg: IMessage) => txMsg.instructions.filter(
   (ins) => notEmpty(ins.parsed) && ins.parsed.type === 'transfer',
@@ -121,6 +122,7 @@ const getTransferType = (
   publicKey: PublicKey,
   source: string | undefined,
 ) => (((type === 'transfer'
+  || type === 'transferChecked'
   || type === 'createAccount'
   || type === 'createAccount'
   || type === 'create')
@@ -143,16 +145,18 @@ const getTransferAmount = (
 const getSwapType = (
   logMessages: string[] | null | undefined,
 ) => {
+  let isSwap = false;
   if (notEmpty(logMessages)) {
     logMessages.forEach((msg, i) => {
-      if (JSON.stringify(msg).includes('SetTokenLedger')
-      || (i === 0 && JSON.stringify(msg).includes('Program JUP2'))) {
-        return true;
+      if (JSON.stringify(msg).includes('SetTokenLedger')) {
+        isSwap = true;
       }
-      return false;
+      if (i === 0 && JSON.stringify(msg).includes('Program JUP2')) {
+        isSwap = true;
+      }
     });
   }
-  return false;
+  return isSwap;
 };
 
 const mapTransaction = async (
