@@ -56,9 +56,26 @@ async function getTokenByAddress(address: string): Promise<IToken | undefined> {
   return tokens.find((t: IToken) => t.address === address);
 }
 
+async function getFeaturedTokenList():Promise<IToken[]> {
+  const tokens = await getTokenList();
+  const featuredList = [
+    { symbol: 'SOL', name: 'Wrapped SOL' },
+    { symbol: 'USDC', name: 'USD Coin' },
+    { symbol: 'SRM', name: 'Serum' },
+    { symbol: 'FIDA', name: 'Bonfida' },
+    { symbol: 'RAY', name: 'Raydium' },
+  ];
+  return tokens.filter(
+    (t) => featuredList.some(
+      (el) => el.symbol === t.symbol && el.name === t.name,
+    ) && t.chainId === 101,
+  );
+}
+
 export {
   getTokenList,
   getTokensByOwner,
   getTokenBySymbol,
   getTokenByAddress,
+  getFeaturedTokenList,
 };

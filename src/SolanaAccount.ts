@@ -115,7 +115,14 @@ class SolanaAccount extends Account<Keypair, PublicKey, Connection> {
   }
 
   async getBestSwapQuote(inToken: string, outToken: string, amount: number, slippage = 0.5) {
-    return swapService.quote(this.networkId, inToken, outToken, amount, slippage);
+    return swapService.quote(
+      this.networkId,
+      inToken,
+      outToken,
+      super.retrieveSecureKeyPair().publicKey.toBase58(),
+      amount,
+      slippage,
+    );
   }
 
   async transfer(destination: string, token: string, amount: number) {
