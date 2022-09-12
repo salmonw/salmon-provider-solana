@@ -4,7 +4,10 @@ import { IToken } from '@salmonw/provider-base';
 import { applyDecimals, applyOutDecimals } from './solana-token-service';
 import { getTokenList } from './solana-token-list-service';
 import { SALMON_API_URL, SOL_ADDRESS } from '../constants/solana-constants';
-import { IJupiterRoute } from '../types/swap';
+import { IJupiterRoute, IRouteUiInfo, IJupiterPriceRoute } from '../types/swap';
+
+const BASE_ENDPOINT_JUP = 'https://price.jup.ag';
+const PRICE_ENDPOINT_JUP = `${BASE_ENDPOINT_JUP}/v1/price`;
 
 const routeUiInfo = (quote: IJupiterRoute, inToken:IToken, outToken:IToken) => {
   const inUiAmount = applyOutDecimals(quote.inAmount, inToken.decimals);
@@ -21,6 +24,27 @@ const routeUiInfo = (quote: IJupiterRoute, inToken:IToken, outToken:IToken) => {
       uiAmount: outUiAmount,
     },
   };
+};
+
+const calculateFee = async (route: IJupiterRoute, uiInfo: IRouteUiInfo) => {
+  let solAmountIn: number;
+  const infoIn = uiInfo.in;
+  if (infoIn.address === SOL_ADDRESS) {
+    solAmountIn = infoIn.uiAmount;
+  } else {
+    const url = `${PRICE_ENDPOINT_JUP}?id=${infoIn.address}&vsToken=SOL`;
+    const response = await axios.get(url);
+    const jupPriceRoute: IJupiterPriceRoute = response.data;
+    solAmountIn = jupPriceRoute.data.price * infoIn.uiAmount;
+  }
+
+  let solAmountMinusFees = solAmountIn;
+  route.marketInfos.forEach((info) => {
+    solAmountMinusFees -= solAmountMinusFees * info.lpFee.pct;
+  });
+
+  const totalFee = solAmountIn - solAmountMinusFees;
+  return totalFee < 0.000001 ? 0.000001 : totalFee;
 };
 
 const quote = async (
@@ -43,7 +67,8 @@ const quote = async (
   const response = await axios.get(url, { headers: { 'X-Network-Id': networkId } });
   const route:IJupiterRoute = response.data;
   const uiInfo = routeUiInfo(route, inToken, outToken);
-  return { route, uiInfo };
+  const fee = await calculateFee(route, uiInfo);
+  return { route, uiInfo, fee };
 };
 
 const createTransaction = async (
