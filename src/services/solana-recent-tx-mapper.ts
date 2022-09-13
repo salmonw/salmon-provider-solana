@@ -33,8 +33,10 @@ const getTokenInfo = async (tokenAddress: string | null, connection: Connection)
     if (notEmpty(tokenAccount.value)) {
       tokenData = tokenAccount.value.data;
       const { parsed } = tokenData as { parsed: IInsParsed };
-      const { info } = parsed;
-      return tokenListService.getTokenByAddress(info.mint);
+      if (notEmpty(parsed)) {
+        const { info } = parsed;
+        return tokenListService.getTokenByAddress(info.mint);
+      }
     }
   }
   return null;
