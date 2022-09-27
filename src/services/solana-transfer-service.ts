@@ -48,10 +48,15 @@ const transactionSpl = async (
   );
   const toTokenAddress = await getAssociatedTokenAddress(new PublicKey(tokenAddress), toPublicKey);
   const token: IToken | undefined = await getTokenByAddress(tokenAddress);
-  if (token === undefined) throw Error('unknown token');
-  const { decimals } = token;
-  const decimalsToken: number = decimals;
-  const transferAmount = decimals ? applyDecimals(amount, decimalsToken) : amount;
+  // if (token === undefined) throw Error('unknown token');
+  let transferAmount: number;
+  if (token === undefined) {
+    transferAmount = amount;
+  } else {
+    const { decimals } = token;
+    const decimalsToken: number = decimals;
+    transferAmount = decimals ? applyDecimals(amount, decimalsToken) : amount;
+  }
   const destTokenAccount = await getTokenAccount(connection, toPublicKey, tokenAddress);
   if (!destTokenAccount) {
     await getOrCreateTokenAccount(connection, fromKeyPair, tokenAddress, toPublicKey);
